@@ -1,9 +1,16 @@
 package arkanoid;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.geom.Ellipse2D;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import sun.font.EAttribute;
 
 /**
  *
@@ -11,7 +18,7 @@ import java.awt.geom.Ellipse2D;
  * 
  * @author Ratomir
  */
-public class Ball extends Rectangle.Double implements GameObject {
+public class Ball extends JPanel implements GameObject, Runnable {
     private final int w = 20;
     private final int h = 20;
     
@@ -28,10 +35,13 @@ public class Ball extends Rectangle.Double implements GameObject {
     private int directionY;
     
     private Board board;
-    private Ellipse2D.Double ellipseForDrawing;
+    private Ellipse2D.Double ellipseForDrawing = new Ellipse2D.Double();
     
     private Color fillColor = Color.RED;
     private Color borderColor = Color.BLACK;
+    
+    private Thread threadBall;
+    private Point position;
 
     /**
      * Inicijalizuje loptu na tabli.
@@ -43,9 +53,16 @@ public class Ball extends Rectangle.Double implements GameObject {
         this.board = board;
         directionX = 1;
         directionY = 1;
-        width = w;
-        height = h;
+        
+        this.setSize(w, h);
+
+        this.setBackground(fillColor);
+        
+        threadBall = new Thread(this);
+        threadBall.start();
     }
+    
+    
     
     /**
      * Menja smer lopte po x osi.
@@ -65,8 +82,7 @@ public class Ball extends Rectangle.Double implements GameObject {
      * Resetuje poziciju lopte i postavlja je na pocetnu poziciju.
      */
     public void reset() {
-        x = Board.PANEL_WIDTH/2 - w/2;
-        y = Board.PANEL_HEIGHT - Pad.h - h;
+        this.setLocation(Board.PANEL_WIDTH/2 - w/2, Board.PANEL_HEIGHT - Pad.h - h);
         
         dx = DX;
         dy = DY;
@@ -78,16 +94,18 @@ public class Ball extends Rectangle.Double implements GameObject {
      */
     public void move() 
     {
-        x += dx * directionX;
-        y += dy * directionY;
+        position = this.getLocation();
+        int tempX = (int)position.getX() + dx * directionX;
+        int tempY = (int)position.getY() + dy * directionY;
+        this.setLocation(tempX, tempY);
         
         /*Ako je lokacija od lopte plus njena duzina veca ili jednaka duzini panela ili
         ako je lokacija lopte manja od 0, vrsi pomeranje horizontalno. */
-        if (x + w >= board.PANEL_WIDTH || x <= 0)
+        if (tempX + this.getSize().width >= board.PANEL_WIDTH || tempX <= 0)
             bouceHorizontal();
         
         //Ako je lopta prosla pored reketa vrsi se smanjivanje broja zivota.
-        if (y + w >= board.PANEL_HEIGHT) 
+        if (tempY + this.getSize().width >= board.PANEL_HEIGHT) 
         {
             board.setNumberOfLife(board.getNumberOfLife() - 1);
             
@@ -105,9 +123,33 @@ public class Ball extends Rectangle.Double implements GameObject {
         /*
         Slucaj kada je loptica dosla do vrha prozora.
         */
-        if(y <= 0)
+        if(tempY <= 0)
         {
             bouceVertical();
+        }
+    }
+    
+    @Override
+    public void paint(Graphics g)
+    {
+        super.paintComponent(g);
+        
+        Graphics2D g2 = (Graphics2D) g;
+        
+        if (this.board.inGame) 
+        {
+            // Saveti pri iscrtavanju
+        
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            draw(g2);
+
+            // Sinhronizovanje sa grafickom kartom
+            Toolkit.getDefaultToolkit().sync();
+
+            // Optimizacija upotrebe RAM-a, 
+            g.dispose();
         }
     }
     
@@ -115,14 +157,45 @@ public class Ball extends Rectangle.Double implements GameObject {
      * Vrsi iscrtavanje lopte na tabli.
      * @param g2 Graphics2D objekat na kojem se vrsi iscrtavanje.
      */
+    @Override
     public void draw(Graphics2D g2) 
     {
-        ellipseForDrawing = new Ellipse2D.Double(x, y, w, h);
+        ellipseForDrawing.setFrame(this.getLocation().getX(), this.getLocation().getY(), 
+                this.getSize().getWidth(), this.getSize().getHeight());
         
         g2.setPaint(fillColor); //postavljamo boju
         g2.fill(ellipseForDrawing); //sa postavljenom bojom filujemo objekat
         
         g2.setPaint(borderColor); //postavljamo boju
         g2.draw(ellipseForDrawing); //crtamo lopticu
+    }
+
+    @Override
+    public void run() {
+         while(true) 
+        {
+            move();
+            repaint();
+            
+            try {
+                Thread.sleep(30); //pauziramo izvrsavanje programa
+            } catch (InterruptedException ex) {
+                System.out.println(ex.toString());
+            }
+        }
+    }
+
+    /**
+     * @return the threadBall
+     */
+    public Thread getThreadBall() {
+        return threadBall;
+    }
+
+    /**
+     * @param threadBall the threadBall to set
+     */
+    public void setThreadBall(Thread threadBall) {
+        this.threadBall = threadBall;
     }
 }

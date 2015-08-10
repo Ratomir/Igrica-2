@@ -70,6 +70,7 @@ class Board extends JPanel implements Runnable
         setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
         setBackground(BACKGROUND_COLOR);
         setFocusable(true);
+        setLayout(null);
         setFont(getFont().deriveFont(Font.BOLD, 18f));
         setDoubleBuffered(true);
         
@@ -77,6 +78,7 @@ class Board extends JPanel implements Runnable
         message = "ARKANOID";
         
         ball = new Ball(this);
+        
         pad = new Pad(this, PANEL_WIDTH/2 - Pad.w/2, PANEL_HEIGHT - Pad.h);
         
         //dodajemo osluskivac na Board za tastaturu
@@ -101,7 +103,8 @@ class Board extends JPanel implements Runnable
         setNumberOfLife(5);
         
         generateTargets();
-        
+        this.add(ball);
+
         ball.reset();
         pad.reset();
     }
@@ -154,7 +157,7 @@ class Board extends JPanel implements Runnable
                 listTargets.get(i).draw(g2);
             }
             
-            ball.draw(g2);
+            //ball.draw(g2);
 
             // Iscrtaj rezultat
 
@@ -180,7 +183,7 @@ class Board extends JPanel implements Runnable
      */
     private void update() 
     {
-        ball.move();
+        
         pad.move();
     }
     
@@ -189,7 +192,7 @@ class Board extends JPanel implements Runnable
      */
     private void detectCollision()
     {
-        if (ball.intersects(pad)) //ako se loptica poklapa sa reketom
+        if (ball.getBounds().intersects(pad)) //ako se loptica poklapa sa reketom
         {
             ball.bouceVertical();
         }
