@@ -4,13 +4,10 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.geom.Ellipse2D;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
-import sun.font.EAttribute;
 
 /**
  *
@@ -40,6 +37,7 @@ public class Ball extends JPanel implements GameObject, Runnable {
     private Color fillColor = Color.RED;
     private Color borderColor = Color.BLACK;
     
+    private Boolean runningBall = true;
     private Thread threadBall;
     private Point position;
 
@@ -78,7 +76,7 @@ public class Ball extends JPanel implements GameObject, Runnable {
      * Resetuje poziciju lopte i postavlja je na pocetnu poziciju.
      */
     public void reset() {
-        this.setLocation(Board.PANEL_WIDTH/2 - w/2, Board.PANEL_HEIGHT - Pad.h - h);
+        this.setLocation(Board.PANEL_WIDTH/2 - w/2, Board.PANEL_HEIGHT - Pad.getH() - h);
         
         dx = DX;
         dy = DY;
@@ -168,7 +166,8 @@ public class Ball extends JPanel implements GameObject, Runnable {
 
     @Override
     public void run() {
-         while(true) 
+        
+        while(runningBall) 
         {
             move();
             repaint();
@@ -193,5 +192,15 @@ public class Ball extends JPanel implements GameObject, Runnable {
      */
     public void setThreadBall(Thread threadBall) {
         this.threadBall = threadBall;
+    }
+
+    @Override
+    public void terminateThread() {
+        this.runningBall = false;
+    }
+
+    @Override
+    public void startThread() {
+        this.runningBall = true;
     }
 }

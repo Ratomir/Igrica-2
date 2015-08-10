@@ -15,7 +15,6 @@ import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 import javax.swing.JPanel;
 
 /**
@@ -41,25 +40,25 @@ class Board extends JPanel implements Runnable
     public static int Y_SPACE_TARGET = 35;
     
     final Color BACKGROUND_COLOR = Color.CYAN;
-    final Thread runner;
     
     // Bodovi u igri
     
-    int myScore = 0;
+    private int myScore = 0;
     
-    Boolean inGame;
+    static Boolean inGame;
     
     // Objekti u igri
     
-    Ball ball;
-    Pad pad;
+    private Ball ball;
+    private Pad pad;
     
-    String message;
-    
-    ArrayList<Target> listTargets = null;
+    private String message;
     
     //broj zivota
     private int numberOfLife;
+    
+    final Thread runner;
+    private TargetThread targetThread;
     
     /**
      * Osnovni konstruktor koji postavlja osnovna podesavanja prozora za igricu.
@@ -78,15 +77,16 @@ class Board extends JPanel implements Runnable
         
         ball = new Ball(this);
         
-        pad = new Pad(this, PANEL_WIDTH/2 - Pad.w/2, PANEL_HEIGHT - Pad.h);
+        pad = new Pad(this, PANEL_WIDTH/2 - Pad.getW()/2, PANEL_HEIGHT - Pad.getH());
         
         //dodajemo osluskivac na Board za tastaturu
         addKeyListener(new GameKeyAdapter());
         
-        generateTargets();
+        targetThread = new TargetThread(this, ball, pad);
         
         //dodajemo proces za board
         runner = new Thread(this);
+        
         //startujemo proces
         runner.start();
     }
@@ -96,17 +96,41 @@ class Board extends JPanel implements Runnable
      */
     public void startGame() 
     {
-        myScore = 0;
+        
+        if(this.targetThread.getListTargets().size() > 0)
+        {
+            for (int i = 0; i < this.targetThread.getListTargets().size(); i++) {
+                this.remove(this.targetThread.getListTargets().get(i));
+            }
+        }
+        
+        setMyScore(0);
         inGame = true;
         
         setNumberOfLife(5);
         
-        generateTargets();
+        targetThread.generateTargets();
+        
         this.add(ball);
         this.add(pad);
-
+        
+        int numberOfTargets = targetThread.getListTargets().size();
+        
+        for (int i = 0; i < numberOfTargets; i++) {
+            this.add(targetThread.getListTargets().get(i));
+        }
+        
+        if(this.targetThread.getStartCollision() == false)
+        {
+            this.targetThread.setStartCollision(true);
+            targetThread.getThread().start();
+        }
+        
         ball.reset();
+        
         pad.reset();
+        
+        
     }
     
     /**
@@ -126,7 +150,7 @@ class Board extends JPanel implements Runnable
      * @param number Broj bodova koji se dodaje na postojece bodove.
      */
     public void countScore(int number) {
-        myScore += number;
+        setMyScore(getMyScore() + number);
     }
     
     /**
@@ -148,16 +172,9 @@ class Board extends JPanel implements Runnable
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
 
-            // Iscrtaj sve objekte
-            
-            for (int i = 0; i < listTargets.size(); i++)
-            {
-                listTargets.get(i).draw(g2);
-            }
-            
             // Iscrtaj rezultat
 
-            g2.drawString("" + myScore, 10, 20);
+            g2.drawString("" + getMyScore(), 10, 20);
             
             //Iscrtaj broj zivota
             
@@ -179,7 +196,7 @@ class Board extends JPanel implements Runnable
      */
     private void update() 
     {
-        pad.move();
+        //pad.move();
     }
     
     /**
@@ -191,44 +208,50 @@ class Board extends JPanel implements Runnable
         {
             ball.bouceVertical();
         }
-        
-        Rectangle2D ballBounds = ball.getBounds();
-        
-        /*
-        Prolazimo kroz sve objekte meta i ispituje da li se poklapaju sa lopticom.
-        U slucaju poklapanja testiramo koja je boja i u zavisnosti toga dodeljujemo odredjen broj bodova.
-        Kasnije se pogodjena meta uklanja iz liste.
-        */
-        
-        for (int i = 0; i < listTargets.size(); i++)
+        else
         {
-            Target tempTarget = listTargets.get(i);
-            
-            if (tempTarget.ellipseForDrawing.intersects(ballBounds))
+            Rectangle2D ballBounds = ball.getBounds();
+
+            /*
+            Prolazimo kroz sve objekte meta i ispituje da li se poklapaju sa lopticom.
+            U slucaju poklapanja testiramo koja je boja i u zavisnosti toga dodeljujemo odredjen broj bodova.
+            Kasnije se pogodjena meta uklanja iz liste.
+            */
+
+            int numberOfTargets = targetThread.getListTargets().size();
+
+            for (int i = 0; i < numberOfTargets; i++)
             {
-                if(tempTarget.getColor() == Color.LIGHT_GRAY)
+                Target tempTarget = targetThread.getListTargets().get(i);
+
+                if (tempTarget.getBounds().intersects(ball.getBounds()))
                 {
-                    countScore(1);
+                    if(tempTarget.getColor() == Color.LIGHT_GRAY)
+                    {
+                        countScore(1);
+                    }
+                    else if(tempTarget.getColor() == Color.BLUE)
+                    {
+                        countScore(2);
+                    }
+                    else
+                    {
+                        countScore(3);
+                    }
+
+                    this.targetThread.getListTargets().remove(i);
+                    ball.bouceVertical();
                 }
-                else if(tempTarget.getColor() == Color.BLUE)
-                {
-                    countScore(2);
-                }
-                else
-                {
-                    countScore(3);
-                }
-                
-                this.listTargets.remove(i);
-                ball.bouceVertical();
+            }
+
+            //U slucaju da je pogodjena zadanja meta, zaustavlja se igrica i korisniku se cestita na pobedi.
+            if(numberOfTargets == 0)
+            {
+                stopGame("Čestitamo pobedili ste, Vaš skor je " + this.getMyScore() + ".");
             }
         }
         
-        //U slucaju da je pogodjena zadanja meta, zaustavlja se igrica i korisniku se cestita na pobedi.
-        if(listTargets.size() == 0)
-        {
-            stopGame("Čestitamo pobedili ste, Vaš skor je " + this.myScore + ".");
-        }
+        
     }
     
     /**
@@ -239,8 +262,8 @@ class Board extends JPanel implements Runnable
     {
         while(true) 
         {
-            update();
-            detectCollision();
+            //update();
+            
             repaint();
 
             try {
@@ -265,6 +288,20 @@ class Board extends JPanel implements Runnable
     public void setNumberOfLife(int numberOfLife)
     {
         this.numberOfLife = numberOfLife;
+    }
+
+    /**
+     * @return the myScore
+     */
+    public int getMyScore() {
+        return myScore;
+    }
+
+    /**
+     * @param myScore the myScore to set
+     */
+    public void setMyScore(int myScore) {
+        this.myScore = myScore;
     }
 
     private class GameKeyAdapter extends KeyAdapter
@@ -299,50 +336,4 @@ class Board extends JPanel implements Runnable
                 pad.stopMoving();
         }
     }
-    
-    /**
-     * Funkcija generise mete sa lokaciom i smesta ih u listu.
-     */
-    public void generateTargets()
-    {
-         //Lista meta
-        listTargets = new ArrayList<Target>();
-        
-        int yLocal = 50;
-        
-        int xLocal = 150;
-        for (int i = 0; i < 4; i++, xLocal += 125)
-        {
-            listTargets.add(new Target(xLocal, yLocal));
-        }
-
-        xLocal = 100;
-        yLocal += Y_SPACE_TARGET;
-        for (int i = 4; i < 9; i++, xLocal += 125)
-        {
-            listTargets.add(new Target(xLocal, yLocal));
-        }
-
-        xLocal = 50;
-        yLocal += Y_SPACE_TARGET;
-        for (int i = 9; i < 15; i++, xLocal += 125)
-        {
-            listTargets.add(new Target(xLocal, yLocal));
-        }
-
-        xLocal = 100;
-        yLocal += Y_SPACE_TARGET;
-        for (int i = 15; i < 20; i++, xLocal += 125)
-        {
-            listTargets.add(new Target(xLocal, yLocal));
-        }
-
-        xLocal = 150;
-        yLocal += Y_SPACE_TARGET;
-        for (int i = 20; i < 24; i++, xLocal += 125)
-        {
-            listTargets.add(new Target(xLocal, yLocal));
-        }
-    }
-
 }

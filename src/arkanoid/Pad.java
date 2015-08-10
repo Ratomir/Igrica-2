@@ -26,11 +26,11 @@ class Pad extends JPanel implements GameObject, Runnable
     /**
      * Sirina reketa
      */
-    public static final int w = 100;
+    private static int w = 100;
     /**
      * Visina reketa
      */
-    public static final int h = 20;
+    private static int h = 20;
     
     private int dx = 10;
     
@@ -40,7 +40,10 @@ class Pad extends JPanel implements GameObject, Runnable
     private Color fillColor = Color.BLACK;
     
     private Point position;
-    RoundRectangle2D roundedRectangle = new RoundRectangle2D.Float();
+    private RoundRectangle2D roundedRectangle = new RoundRectangle2D.Float();
+    
+    private Thread threadPad;
+    private boolean runningPad = true;
     
     /**
      * Inicijalizuje reket na prosedjenoj lokaciji na tabli.
@@ -55,47 +58,50 @@ class Pad extends JPanel implements GameObject, Runnable
         this.setOpaque(false);
         this.setSize(w, h);
         this.state = MovingState.STANDING;
+        
+        threadPad = new Thread(this);
+        threadPad.start();
     }
     
     /**
      * Postavlja stanje kretanja reketa u desno.
      */
     public void moveRight() {
-        state = MovingState.MOVING_RIGHT;
+        setState(MovingState.MOVING_RIGHT);
     }
     
     /**
      * Postavlja stanje kretanja reketa u levo.
      */
     public void moveLeft() {
-        state = MovingState.MOVING_LEFT;
+        setState(MovingState.MOVING_LEFT);
     }
     
     /**
      * Postavlja stanje kretanja reketa u stajanje.
      */
     public void stopMoving() {
-        state = MovingState.STANDING;
+        setState(MovingState.STANDING);
     }
     
     /**
      * Izvrsava pomeranje reketa u zavisnosti od stanja.
      */
     public void move() {
-        position = this.getLocation();
+        setPosition(this.getLocation());
         
-        int tempX = (int)position.getX();
-        int tempY = (int)position.getY();
+        int tempX = (int)getPosition().getX();
+        int tempY = (int)getPosition().getY();
         
-        if (state == MovingState.MOVING_RIGHT)
-            tempX += dx;
-        else if (state == MovingState.MOVING_LEFT)
-            tempX -= dx;
+        if (getState() == MovingState.MOVING_RIGHT)
+            tempX += getDx();
+        else if (getState() == MovingState.MOVING_LEFT)
+            tempX -= getDx();
         
         if (tempX < 0) //slucaj kada je skroz levo reket
             tempX = 0;
-        else if (tempX + this.getSize().width > board.PANEL_WIDTH) //slucaj kada je skoz desno
-            tempX = board.PANEL_WIDTH - this.getSize().width;
+        else if (tempX + this.getSize().width > getBoard().PANEL_WIDTH) //slucaj kada je skoz desno
+            tempX = getBoard().PANEL_WIDTH - this.getSize().width;
         
         this.setLocation(tempX, tempY);
     }
@@ -105,7 +111,7 @@ class Pad extends JPanel implements GameObject, Runnable
      */
     public void reset()
     {
-        this.setLocation(board.PANEL_WIDTH/2 - Pad.w/2, Board.PANEL_HEIGHT-Pad.h-2);
+        this.setLocation(getBoard().PANEL_WIDTH/2 - Pad.getW()/2, Board.PANEL_HEIGHT-Pad.getH()+2);
     }
     
     @Override
@@ -115,7 +121,7 @@ class Pad extends JPanel implements GameObject, Runnable
         
         Graphics2D g2 = (Graphics2D) g;
         
-        if (this.board.inGame) 
+        if (this.getBoard().inGame) 
         {
             // Saveti pri iscrtavanju
         
@@ -138,17 +144,27 @@ class Pad extends JPanel implements GameObject, Runnable
      * @param g2 Graphics2D objekat na kome se vrsi iscrtavanje.
      */
     public void draw(Graphics2D g2) {
-        roundedRectangle = new RoundRectangle2D.Float(1, 1, w, h, 2, 2);
+        setRoundedRectangle(new RoundRectangle2D.Float(1, 1, getW() - 2, getH() - 2, 10, 10));
         
-        g2.setPaint(fillColor);
-        g2.fill(roundedRectangle);
-        g2.draw(roundedRectangle); //crtamo lopticu
+        g2.setPaint(getFillColor());
+        g2.fill(getRoundedRectangle());
+        g2.draw(getRoundedRectangle()); //crtamo lopticu
+    }
+    
+    @Override
+    public void terminateThread() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void startThread() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     @Override
     public void run() {
         
-        while(true) 
+        while(isRunningPad()) 
         {
             move();
             repaint();
@@ -157,7 +173,148 @@ class Pad extends JPanel implements GameObject, Runnable
                 Thread.sleep(30); //pauziramo izvrsavanje programa
             } catch (InterruptedException ex) {
                 System.out.println(ex.toString());
+                setRunningPad(false);
             }
         }
+    }
+    
+    /**
+     * @return the w
+     */
+    public static int getW() {
+        return w;
+    }
+
+    /**
+     * @param aW the w to set
+     */
+    public static void setW(int aW) {
+        w = aW;
+    }
+
+    /**
+     * @return the h
+     */
+    public static int getH() {
+        return h;
+    }
+
+    /**
+     * @param aH the h to set
+     */
+    public static void setH(int aH) {
+        h = aH;
+    }
+
+    /**
+     * @return the dx
+     */
+    public int getDx() {
+        return dx;
+    }
+
+    /**
+     * @param dx the dx to set
+     */
+    public void setDx(int dx) {
+        this.dx = dx;
+    }
+
+    /**
+     * @return the board
+     */
+    public Board getBoard() {
+        return board;
+    }
+
+    /**
+     * @param board the board to set
+     */
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+
+    /**
+     * @return the state
+     */
+    public MovingState getState() {
+        return state;
+    }
+
+    /**
+     * @param state the state to set
+     */
+    public void setState(MovingState state) {
+        this.state = state;
+    }
+
+    /**
+     * @return the fillColor
+     */
+    public Color getFillColor() {
+        return fillColor;
+    }
+
+    /**
+     * @param fillColor the fillColor to set
+     */
+    public void setFillColor(Color fillColor) {
+        this.fillColor = fillColor;
+    }
+
+    /**
+     * @return the position
+     */
+    public Point getPosition() {
+        return position;
+    }
+
+    /**
+     * @param position the position to set
+     */
+    public void setPosition(Point position) {
+        this.position = position;
+    }
+
+    /**
+     * @return the roundedRectangle
+     */
+    public RoundRectangle2D getRoundedRectangle() {
+        return roundedRectangle;
+    }
+
+    /**
+     * @param roundedRectangle the roundedRectangle to set
+     */
+    public void setRoundedRectangle(RoundRectangle2D roundedRectangle) {
+        this.roundedRectangle = roundedRectangle;
+    }
+
+    /**
+     * @return the threadPad
+     */
+    public Thread getThreadPad() {
+        return threadPad;
+    }
+
+    /**
+     * @param threadPad the threadPad to set
+     */
+    public void setThreadPad(Thread threadPad) {
+        this.threadPad = threadPad;
+    }
+
+    /**
+     * @return the runningPad
+     */
+    public boolean isRunningPad() {
+        return runningPad;
+    }
+
+    /**
+     * @param runningPad the runningPad to set
+     */
+    public void setRunningPad(boolean runningPad) {
+        this.runningPad = runningPad;
     }
 }

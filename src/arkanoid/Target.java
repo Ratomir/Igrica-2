@@ -6,20 +6,24 @@
 package arkanoid;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.geom.RoundRectangle2D;
 import java.util.Random;
+import javax.swing.JPanel;
 
 /**
  * Klasa Target implementira interface GameObject.
  * 
  * @author Ratomir
  */
-public class Target implements GameObject
+public class Target extends JPanel implements GameObject
 {
     //Duzina, visina izmedju pravougaonika.
-    public static final float WIDTH = 80;
-    public static final float HEIGHT = 25;
+    public static final float WIDTH = 81;
+    public static final float HEIGHT = 26;
     
     public RoundRectangle2D.Float ellipseForDrawing = null;
     
@@ -41,7 +45,10 @@ public class Target implements GameObject
         locationX = x;
         locationY = y;
         
-        this.ellipseForDrawing = new RoundRectangle2D.Float(locationX, locationY, WIDTH, HEIGHT, 10, 10);
+        this.setLocation(x, y);
+        this.setSize((int)WIDTH, (int)HEIGHT);
+        
+        this.ellipseForDrawing = new RoundRectangle2D.Float(0, 0, WIDTH-1, HEIGHT-1, 10, 10);
         
         Random random = new Random();
         int numberOfColor = random.nextInt(3); //biramo jedan slucajan broj do 3 i na osnovu njega stavljamo boju za pravougaonik
@@ -63,6 +70,30 @@ public class Target implements GameObject
     @Override
     public void move()
     {
+    }
+    
+     @Override
+    public void paint(Graphics g)
+    {
+        super.paintComponent(g);
+        
+        Graphics2D g2 = (Graphics2D) g;
+        
+        if (Board.inGame) 
+        {
+            // Saveti pri iscrtavanju
+        
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            draw(g2);
+
+            // Sinhronizovanje sa grafickom kartom
+            Toolkit.getDefaultToolkit().sync();
+
+            // Optimizacija upotrebe RAM-a, 
+            g.dispose();
+        }
     }
     
     /**
@@ -94,6 +125,16 @@ public class Target implements GameObject
     public void setColor(Color color)
     {
         this.color = color;
+    }
+
+    @Override
+    public void terminateThread() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void startThread() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }
