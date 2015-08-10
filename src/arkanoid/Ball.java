@@ -19,8 +19,8 @@ import sun.font.EAttribute;
  * @author Ratomir
  */
 public class Ball extends JPanel implements GameObject, Runnable {
-    private final int w = 20;
-    private final int h = 20;
+    private final int w = 24;
+    private final int h = 24;
     
     // Minimalni, maksimalni intenzitet brzine lopte i korak ubrzanja
     private final int DX = 4;    
@@ -53,16 +53,12 @@ public class Ball extends JPanel implements GameObject, Runnable {
         this.board = board;
         directionX = 1;
         directionY = 1;
-        
+        this.setOpaque(false);
         this.setSize(w, h);
 
-        this.setBackground(fillColor);
-        
         threadBall = new Thread(this);
         threadBall.start();
     }
-    
-    
     
     /**
      * Menja smer lopte po x osi.
@@ -160,8 +156,8 @@ public class Ball extends JPanel implements GameObject, Runnable {
     @Override
     public void draw(Graphics2D g2) 
     {
-        ellipseForDrawing.setFrame(this.getLocation().getX(), this.getLocation().getY(), 
-                this.getSize().getWidth(), this.getSize().getHeight());
+        ellipseForDrawing.setFrame(1, 1, 
+                this.getSize().getWidth()-2, this.getSize().getHeight()-2);
         
         g2.setPaint(fillColor); //postavljamo boju
         g2.fill(ellipseForDrawing); //sa postavljenom bojom filujemo objekat

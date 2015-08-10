@@ -6,14 +6,20 @@
 package arkanoid;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Toolkit;
+import java.awt.geom.RoundRectangle2D;
+import javax.swing.JPanel;
 
 /**
  *
  * @author Ratomir
  */
-class Pad extends Rectangle.Double implements GameObject 
+class Pad extends JPanel implements GameObject, Runnable
 {
     enum MovingState { STANDING, MOVING_LEFT, MOVING_RIGHT }
     
@@ -33,6 +39,9 @@ class Pad extends Rectangle.Double implements GameObject
     
     private Color fillColor = Color.BLACK;
     
+    private Point position;
+    RoundRectangle2D roundedRectangle = new RoundRectangle2D.Float();
+    
     /**
      * Inicijalizuje reket na prosedjenoj lokaciji na tabli.
      * 
@@ -42,10 +51,9 @@ class Pad extends Rectangle.Double implements GameObject
      */
     public Pad(Board board, int x, int y) {
         this.board = board;
-        this.x = x;
-        this.y = y;
-        this.width = w;
-        this.height = h;
+        this.setLocation(x, y);
+        this.setOpaque(false);
+        this.setSize(w, h);
         this.state = MovingState.STANDING;
     }
     
@@ -74,15 +82,22 @@ class Pad extends Rectangle.Double implements GameObject
      * Izvrsava pomeranje reketa u zavisnosti od stanja.
      */
     public void move() {
-        if (state == MovingState.MOVING_RIGHT)
-            x += dx;
-        else if (state == MovingState.MOVING_LEFT)
-            x -= dx;
+        position = this.getLocation();
         
-        if (x < 0) //slucaj kada je skroz levo reket
-            x = 0;
-        else if (x + w > board.PANEL_WIDTH) //slucaj kada je skoz desno
-            x = board.PANEL_WIDTH - w;
+        int tempX = (int)position.getX();
+        int tempY = (int)position.getY();
+        
+        if (state == MovingState.MOVING_RIGHT)
+            tempX += dx;
+        else if (state == MovingState.MOVING_LEFT)
+            tempX -= dx;
+        
+        if (tempX < 0) //slucaj kada je skroz levo reket
+            tempX = 0;
+        else if (tempX + this.getSize().width > board.PANEL_WIDTH) //slucaj kada je skoz desno
+            tempX = board.PANEL_WIDTH - this.getSize().width;
+        
+        this.setLocation(tempX, tempY);
     }
     
     /**
@@ -90,7 +105,31 @@ class Pad extends Rectangle.Double implements GameObject
      */
     public void reset()
     {
-        this.x = board.PANEL_WIDTH/2 - Pad.w/2;
+        this.setLocation(board.PANEL_WIDTH/2 - Pad.w/2, Board.PANEL_HEIGHT-Pad.h-2);
+    }
+    
+    @Override
+    public void paint(Graphics g)
+    {
+        super.paintComponent(g);
+        
+        Graphics2D g2 = (Graphics2D) g;
+        
+        if (this.board.inGame) 
+        {
+            // Saveti pri iscrtavanju
+        
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            draw(g2);
+
+            // Sinhronizovanje sa grafickom kartom
+            Toolkit.getDefaultToolkit().sync();
+
+            // Optimizacija upotrebe RAM-a, 
+            g.dispose();
+        }
     }
     
     /**
@@ -99,7 +138,26 @@ class Pad extends Rectangle.Double implements GameObject
      * @param g2 Graphics2D objekat na kome se vrsi iscrtavanje.
      */
     public void draw(Graphics2D g2) {
+        roundedRectangle = new RoundRectangle2D.Float(1, 1, w, h, 2, 2);
+        
         g2.setPaint(fillColor);
-        g2.fill(this);
+        g2.fill(roundedRectangle);
+        g2.draw(roundedRectangle); //crtamo lopticu
+    }
+    
+    @Override
+    public void run() {
+        
+        while(true) 
+        {
+            move();
+            repaint();
+            
+            try {
+                Thread.sleep(30); //pauziramo izvrsavanje programa
+            } catch (InterruptedException ex) {
+                System.out.println(ex.toString());
+            }
+        }
     }
 }

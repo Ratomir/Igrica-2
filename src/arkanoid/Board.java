@@ -49,7 +49,6 @@ class Board extends JPanel implements Runnable
     
     Boolean inGame;
     
-    
     // Objekti u igri
     
     Ball ball;
@@ -104,6 +103,7 @@ class Board extends JPanel implements Runnable
         
         generateTargets();
         this.add(ball);
+        this.add(pad);
 
         ball.reset();
         pad.reset();
@@ -150,15 +150,11 @@ class Board extends JPanel implements Runnable
 
             // Iscrtaj sve objekte
             
-            pad.draw(g2);
-            
             for (int i = 0; i < listTargets.size(); i++)
             {
                 listTargets.get(i).draw(g2);
             }
             
-            //ball.draw(g2);
-
             // Iscrtaj rezultat
 
             g2.drawString("" + myScore, 10, 20);
@@ -183,7 +179,6 @@ class Board extends JPanel implements Runnable
      */
     private void update() 
     {
-        
         pad.move();
     }
     
@@ -192,7 +187,7 @@ class Board extends JPanel implements Runnable
      */
     private void detectCollision()
     {
-        if (ball.getBounds().intersects(pad)) //ako se loptica poklapa sa reketom
+        if (ball.getBounds().intersects(pad.getBounds())) //ako se loptica poklapa sa reketom
         {
             ball.bouceVertical();
         }
