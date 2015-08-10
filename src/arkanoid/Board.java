@@ -24,6 +24,23 @@ import javax.swing.JPanel;
  */
 class Board extends JPanel implements Runnable
 {
+
+    /**
+     * @return the level
+     */
+    public int getLevel() {
+        return level;
+    }
+
+    /**
+     * @param level the level to set
+     */
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public static enum GameState { INIT, PLAY, WON, LOSS, NEXTLEVEL }
+    
     /**
      * Sirina table
      */
@@ -45,12 +62,13 @@ class Board extends JPanel implements Runnable
     
     private int myScore = 0;
     
-    static Boolean inGame;
+    private int level = 1;
     
     // Objekti u igri
     
     private Ball ball;
     private Pad pad;
+    private NextLevel nextLevelPanel;
     
     private String message;
     
@@ -59,6 +77,8 @@ class Board extends JPanel implements Runnable
     
     final Thread runner;
     private TargetThread targetThread;
+    
+    public static GameState gameState;
     
     /**
      * Osnovni konstruktor koji postavlja osnovna podesavanja prozora za igricu.
@@ -72,7 +92,6 @@ class Board extends JPanel implements Runnable
         setFont(getFont().deriveFont(Font.BOLD, 18f));
         setDoubleBuffered(true);
         
-        inGame = false;
         message = "ARKANOID";
         
         ball = new Ball(this);
@@ -82,10 +101,14 @@ class Board extends JPanel implements Runnable
         //dodajemo osluskivac na Board za tastaturu
         addKeyListener(new GameKeyAdapter());
         
+        nextLevelPanel = new NextLevel(this);
+        
         targetThread = new TargetThread(this, ball, pad);
         
         //dodajemo proces za board
         runner = new Thread(this);
+        
+        gameState = GameState.INIT;
         
         //startujemo proces
         runner.start();
@@ -96,6 +119,7 @@ class Board extends JPanel implements Runnable
      */
     public void startGame() 
     {
+        gameState = GameState.PLAY;
         
         if(this.targetThread.getListTargets().size() > 0)
         {
@@ -105,7 +129,6 @@ class Board extends JPanel implements Runnable
         }
         
         setMyScore(0);
-        inGame = true;
         
         setNumberOfLife(5);
         
@@ -129,9 +152,44 @@ class Board extends JPanel implements Runnable
         ball.reset();
         
         pad.reset();
-        
-        
     }
+    
+    /**
+     * Funkcija generiše novi nivo.
+     */
+    public void newLevel()
+    {
+        gameState = GameState.PLAY;
+        
+        if(this.targetThread.getListTargets().size() > 0)
+        {
+            for (int i = 0; i < this.targetThread.getListTargets().size(); i++) {
+                this.remove(this.targetThread.getListTargets().get(i));
+            }
+        }
+        
+        targetThread.generateTargets();
+        
+        this.add(ball);
+        this.add(pad);
+        
+        int numberOfTargets = targetThread.getListTargets().size();
+        
+        for (int i = 0; i < numberOfTargets; i++) {
+            this.add(targetThread.getListTargets().get(i));
+        }
+        
+        if(this.targetThread.getStartCollision() == false)
+        {
+            this.targetThread.setStartCollision(true);
+            targetThread.getThread().start();
+        }
+        
+        ball.reset();
+        
+        pad.reset();
+    }
+    
     
     /**
      * Funkcija postavlja parametre za stopiranje igre.
@@ -140,7 +198,17 @@ class Board extends JPanel implements Runnable
      */
     public void stopGame(String message) 
     {
-        inGame = false;
+        gameState = GameState.LOSS;
+        this.message = message;
+    }
+    
+    public void newLevelMessage(String message)
+    {
+        gameState = GameState.NEXTLEVEL;
+        
+         this.removeAll();
+            this.add(nextLevelPanel);
+            this.invalidate();
         this.message = message;
     }
     
@@ -165,7 +233,7 @@ class Board extends JPanel implements Runnable
         
         Graphics2D g2 = (Graphics2D) g;
         
-        if (inGame) 
+        if (gameState == GameState.PLAY) 
         {
             // Saveti pri iscrtavanju
         
@@ -176,6 +244,11 @@ class Board extends JPanel implements Runnable
 
             g2.drawString("" + getMyScore(), 10, 20);
             
+            
+            //Iscrtaj trenutni level
+            
+            g2.drawString("Level " + getLevel(), PANEL_WIDTH/2-20, 20);
+            
             //Iscrtaj broj zivota
             
             g2.drawString("Broj života: " + getNumberOfLife(), PANEL_WIDTH-160, 20);
@@ -185,73 +258,24 @@ class Board extends JPanel implements Runnable
 
             // Optimizacija upotrebe RAM-a, 
             g.dispose();
-        } else {
+        } else if(gameState == GameState.LOSS) {
             int messageWidth = getFontMetrics(getFont()).stringWidth(message);
             g2.drawString(message, PANEL_WIDTH/2 - messageWidth/2, PANEL_HEIGHT/2);
         }
-    }
-    
-    /**
-     * Metoda vrsi azuriranje loptice i reketa.
-     */
-    private void update() 
-    {
-        //pad.move();
-    }
-    
-    /**
-     * Funkcija detektuje poklapanje loptice sa reketom i loptice sa metom.
-     */
-    private void detectCollision()
-    {
-        if (ball.getBounds().intersects(pad.getBounds())) //ako se loptica poklapa sa reketom
+        else if(gameState == GameState.INIT)
         {
-            ball.bouceVertical();
+            int messageWidth = getFontMetrics(getFont()).stringWidth(message);
+            g2.drawString(message, PANEL_WIDTH/2 - messageWidth/2, PANEL_HEIGHT/2);
         }
-        else
+        else if(gameState == GameState.NEXTLEVEL)
         {
-            Rectangle2D ballBounds = ball.getBounds();
-
-            /*
-            Prolazimo kroz sve objekte meta i ispituje da li se poklapaju sa lopticom.
-            U slucaju poklapanja testiramo koja je boja i u zavisnosti toga dodeljujemo odredjen broj bodova.
-            Kasnije se pogodjena meta uklanja iz liste.
-            */
-
-            int numberOfTargets = targetThread.getListTargets().size();
-
-            for (int i = 0; i < numberOfTargets; i++)
-            {
-                Target tempTarget = targetThread.getListTargets().get(i);
-
-                if (tempTarget.getBounds().intersects(ball.getBounds()))
-                {
-                    if(tempTarget.getColor() == Color.LIGHT_GRAY)
-                    {
-                        countScore(1);
-                    }
-                    else if(tempTarget.getColor() == Color.BLUE)
-                    {
-                        countScore(2);
-                    }
-                    else
-                    {
-                        countScore(3);
-                    }
-
-                    this.targetThread.getListTargets().remove(i);
-                    ball.bouceVertical();
-                }
-            }
-
-            //U slucaju da je pogodjena zadanja meta, zaustavlja se igrica i korisniku se cestita na pobedi.
-            if(numberOfTargets == 0)
-            {
-                stopGame("Čestitamo pobedili ste, Vaš skor je " + this.getMyScore() + ".");
-            }
+//            int messageWidth = getFontMetrics(getFont()).stringWidth(message);
+//            g2.drawString(message, PANEL_WIDTH/2 - messageWidth/2, PANEL_HEIGHT/2);
+            
+            this.removeAll();
+            this.add(nextLevelPanel);
+            this.invalidate();
         }
-        
-        
     }
     
     /**
@@ -260,7 +284,7 @@ class Board extends JPanel implements Runnable
     @Override
     public void run()
     {
-        while(true) 
+        while(gameState == GameState.INIT || gameState == GameState.LOSS || gameState == GameState.PLAY) 
         {
             //update();
             

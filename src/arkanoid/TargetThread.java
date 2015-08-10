@@ -95,7 +95,9 @@ public class TargetThread implements Runnable{
             //U slucaju da je pogodjena zadanja meta, zaustavlja se igrica i korisniku se cestita na pobedi.
             if(this.listTargets.size() == 0)
             {
-                this.board.stopGame("Čestitamo pobedili ste, Vaš skor je " + this.board.getMyScore() + ".");
+                this.board.newLevelMessage("Čestitamo!!! Prošli ste " + this.board.getLevel() + ". Vaš skor je " + this.board.getMyScore() + ".");
+                int number = this.board.getLevel();
+                this.board.setLevel(number++);
             }
         }
     }
@@ -107,6 +109,43 @@ public class TargetThread implements Runnable{
          //Lista meta
         setListTargets(new ArrayList<Target>());
         
+        drawOne();
+    }
+    
+    public void drawOne()
+    {
+        int yLocal = 50;
+        
+        int xLocal = 50;
+        for (int i = 0; i < 1; i++, xLocal += 125)
+        {
+            getListTargets().add(new Target(xLocal, yLocal));
+        }
+
+//        xLocal = 50;
+//        yLocal += Y_SPACE_TARGET;
+//        for (int i = 6; i < 12; i++, xLocal += 125)
+//        {
+//            getListTargets().add(new Target(xLocal, yLocal));
+//        }
+//
+//        xLocal = 50;
+//        yLocal += Y_SPACE_TARGET;
+//        for (int i = 12; i < 18; i++, xLocal += 125)
+//        {
+//            getListTargets().add(new Target(xLocal, yLocal));
+//        }
+//
+//        xLocal = 50;
+//        yLocal += Y_SPACE_TARGET;
+//        for (int i = 18; i < 24; i++, xLocal += 125)
+//        {
+//            getListTargets().add(new Target(xLocal, yLocal));
+//        }
+    }
+    
+    public void drawSecound()
+    {
         int yLocal = 50;
         
         int xLocal = 150;

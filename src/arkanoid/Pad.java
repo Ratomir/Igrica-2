@@ -121,7 +121,7 @@ class Pad extends JPanel implements GameObject, Runnable
         
         Graphics2D g2 = (Graphics2D) g;
         
-        if (this.getBoard().inGame) 
+        if (Board.gameState == Board.GameState.PLAY) 
         {
             // Saveti pri iscrtavanju
         

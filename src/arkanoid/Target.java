@@ -48,6 +48,8 @@ public class Target extends JPanel implements GameObject
         this.setLocation(x, y);
         this.setSize((int)WIDTH, (int)HEIGHT);
         
+        this.setOpaque(false);
+        
         this.ellipseForDrawing = new RoundRectangle2D.Float(0, 0, WIDTH-1, HEIGHT-1, 10, 10);
         
         Random random = new Random();
@@ -79,7 +81,7 @@ public class Target extends JPanel implements GameObject
         
         Graphics2D g2 = (Graphics2D) g;
         
-        if (Board.inGame) 
+        if (Board.gameState == Board.GameState.PLAY) 
         {
             // Saveti pri iscrtavanju
         
