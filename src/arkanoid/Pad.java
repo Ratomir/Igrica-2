@@ -146,7 +146,7 @@ class Pad extends JPanel implements GameObject, Runnable
         
         g2.setPaint(getFillColor());
         g2.fill(getRoundedRectangle());
-        g2.draw(getRoundedRectangle()); //crtamo lopticu
+        g2.draw(getRoundedRectangle()); //crtamo reket
     }
     
     @Override

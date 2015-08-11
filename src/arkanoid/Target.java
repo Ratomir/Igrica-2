@@ -35,7 +35,7 @@ public class Target extends JPanel implements GameObject
     //boja za pravougaonik
     private Color color = null;
     
-    Image img1 = Toolkit.getDefaultToolkit().getImage("arkanoid/question.png");
+    Image img1 = Toolkit.getDefaultToolkit().getImage("src/arkanoid/question.png");
     
     private Boolean image = false;
     
@@ -118,7 +118,7 @@ public class Target extends JPanel implements GameObject
             g2.setPaint(Color.BLACK);
             g2.draw(ellipseForDrawing);
             
-            g2.drawImage(img1, 0, 2, 20, 20, this);
+            g2.drawImage(img1, (int)WIDTH/2 - 12, 2, this);
         }
         else
         {

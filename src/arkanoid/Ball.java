@@ -36,8 +36,8 @@ public class Ball extends JPanel implements GameObject, Runnable {
     private Board board;
     private Ellipse2D.Double ellipseForDrawing = new Ellipse2D.Double();
 
-    private Color fillColor = Color.RED;
-    private Color borderColor = Color.BLACK;
+    private final Color fillColor = Color.RED;
+    private final Color borderColor = Color.BLACK;
 
     private Boolean runningBall = true;
     private Thread threadBall;
@@ -51,27 +51,27 @@ public class Ball extends JPanel implements GameObject, Runnable {
      */
     public Ball(Board board) {
         this.board = board;
-        directionX = 1;
-        directionY = 1;
+        this.directionX = 1;
+        this.directionY = 1;
         this.setOpaque(false);
         this.setSize(w, h);
 
-        threadBall = new Thread(this);
-        threadBall.start();
+        this.threadBall = new Thread(this);
+        this.threadBall.start();
     }
 
     /**
      * Menja smer lopte po x osi.
      */
     public void bouceHorizontal() {
-        directionX = -directionX;
+        this.directionX = -this.directionX;
     }
 
     /**
      * Menja smer lopte po y osi.
      */
     public void bouceVertical() {
-        directionY = -directionY;
+        this.directionY = -this.directionY;
     }
 
     /**
@@ -80,15 +80,16 @@ public class Ball extends JPanel implements GameObject, Runnable {
     public void reset() {
         this.setLocation(Board.PANEL_WIDTH / 2 - w / 2, Board.PANEL_HEIGHT - Pad.getH() - h-250);
 
-        dx = DX;
-        dy = DY;
+        this.dx = DX;
+        this.dy = DY;
     }
 
     /**
      * Vrsi pomeranje lopte. Ispituje poziciji lopte.
      */
+    @Override
     public void move() {
-        position = this.getLocation();
+        this.position = this.getLocation();
         int tempX = (int) position.getX() + dx * directionX;
         int tempY = (int) position.getY() + dy * directionY;
         this.setLocation(tempX, tempY);
@@ -96,7 +97,7 @@ public class Ball extends JPanel implements GameObject, Runnable {
         /*Ako je lokacija od lopte plus njena duzina veca ili jednaka duzini panela ili
          ako je lokacija lopte manja od 0, vrsi pomeranje horizontalno. */
         if (tempX + this.getSize().width >= board.PANEL_WIDTH || tempX <= 0) {
-            bouceHorizontal();
+            this.bouceHorizontal();
         }
 
         //Ako je lopta prosla pored reketa vrsi se smanjivanje broja zivota.
@@ -105,6 +106,8 @@ public class Ball extends JPanel implements GameObject, Runnable {
             if (board.getTargetThread().getListBalls().size() > 1) {
                 board.getTargetThread().getListBalls().remove(this);
                 board.remove(this);
+//                this.getThreadBall().interrupt();
+                this.terminateThread();
             } else {
                 
                 board.setNumberOfLife(board.getNumberOfLife() - 1);
@@ -114,7 +117,7 @@ public class Ball extends JPanel implements GameObject, Runnable {
                     board.stopGame("IGRICA GOTOVA, ZDRAVO!");
                 } else {
                     reset();
-                    bouceVertical();
+                    this.bouceVertical();
                 }
             }
 
@@ -124,7 +127,7 @@ public class Ball extends JPanel implements GameObject, Runnable {
          Slucaj kada je loptica dosla do vrha prozora.
          */
         if (tempY <= 0) {
-            bouceVertical();
+            this.bouceVertical();
         }
     }
 
@@ -140,7 +143,7 @@ public class Ball extends JPanel implements GameObject, Runnable {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
 
-            draw(g2);
+            this.draw(g2);
 
             // Sinhronizovanje sa grafickom kartom
             Toolkit.getDefaultToolkit().sync();
@@ -170,7 +173,7 @@ public class Ball extends JPanel implements GameObject, Runnable {
     @Override
     public void run() {
 
-        while (true) {
+        while (getRunningBall()) {
             move();
             repaint();
 
@@ -178,6 +181,7 @@ public class Ball extends JPanel implements GameObject, Runnable {
                 Thread.sleep(30); //pauziramo izvrsavanje programa
             } catch (InterruptedException ex) {
                 System.out.println(ex.toString());
+//                this.threadBall.interrupt();
             }
         }
     }
@@ -198,11 +202,25 @@ public class Ball extends JPanel implements GameObject, Runnable {
 
     @Override
     public void terminateThread() {
-        this.runningBall = false;
+        this.setRunningBall((Boolean) false);
     }
 
     @Override
     public void startThread() {
-        this.runningBall = true;
+        this.setRunningBall((Boolean) true);
+    }
+
+    /**
+     * @return the runningBall
+     */
+    public Boolean getRunningBall() {
+        return runningBall;
+    }
+
+    /**
+     * @param runningBall the runningBall to set
+     */
+    public void setRunningBall(Boolean runningBall) {
+        this.runningBall = runningBall;
     }
 }

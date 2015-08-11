@@ -79,7 +79,6 @@ class Board extends JPanel implements Runnable
     
     // Objekti u igri
     
-    private Ball ball;
     private Pad pad;
     
     private String message;
@@ -106,14 +105,12 @@ class Board extends JPanel implements Runnable
         
         message = "ARKANOID";
         
-        ball = new Ball(this);
-        
         pad = new Pad(this, PANEL_WIDTH/2 - Pad.getW()/2, PANEL_HEIGHT - Pad.getH());
         
         //dodajemo osluskivac na Board za tastaturu
         addKeyListener(new GameKeyAdapter());
         
-        targetThread = new TargetThread(this, ball, pad);
+        targetThread = new TargetThread(this, pad);
         
         //dodajemo proces za board
         runner = new Thread(this);
@@ -136,8 +133,6 @@ class Board extends JPanel implements Runnable
             for (int i = 0; i < this.getTargetThread().getListTargets().size(); i++) {
                 this.remove(this.getTargetThread().getListTargets().get(i));
             }
-            
-            this.getTargetThread().getListBalls().add(ball);
         }
         
         if(this.getTargetThread().getListBalls() != null && this.getTargetThread().getListBalls().size() > 0)
@@ -151,19 +146,16 @@ class Board extends JPanel implements Runnable
         this.level = 1;
         setNumberOfLife(5);
         
-        getTargetThread().generateTargets();
+        this.getTargetThread().generateTargets();
+        this.getTargetThread().restartBalls();
         
-        int numberOfTargets = getTargetThread().getListTargets().size();
-        
-        for (int i = 0; i < numberOfTargets; i++) {
+        for (int i = 0; i < getTargetThread().getListTargets().size(); i++) {
             this.add(getTargetThread().getListTargets().get(i));
         }
         
-        ball.reset();
-        
         pad.reset();
         
-        this.add(ball);
+        this.add(this.getTargetThread().getListBalls().get(0));
         this.add(pad);
     }
     
@@ -174,17 +166,19 @@ class Board extends JPanel implements Runnable
     {
         gameState = GameState.PLAY;
         
-        ball.reset();
-        
         pad.reset();
         
         this.getTargetThread().generateTargets();
+        this.getTargetThread().restartBalls();
         
         int numberOfTargets = getTargetThread().getListTargets().size();
         
         for (int i = 0; i < getTargetThread().getListTargets().size(); i++) {
             this.add(getTargetThread().getListTargets().get(i));
         }
+        
+//        this.add(this.getTargetThread().getListBalls().get(0));
+
     }
     
     /**

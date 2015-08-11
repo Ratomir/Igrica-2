@@ -20,22 +20,16 @@ public class TargetThread implements Runnable {
 
     private Thread thread;
     private Board board;
-    private Ball ball;
     private Pad pad;
 
-    private ArrayList<Ball> listBalls = null;
+    private static ArrayList<Ball> listBalls = null;
 
     private Boolean startCollision = false;
 
-    public TargetThread(Board board, Ball ball, Pad pad) {
-        generateTargets();
+    public TargetThread(Board board, Pad pad) {
 
-        this.ball = ball;
         this.board = board;
         this.pad = pad;
-
-        this.listBalls = new ArrayList<>();
-        this.listBalls.add(ball);
 
         thread = new Thread(this);
         thread.start();
@@ -73,36 +67,34 @@ public class TargetThread implements Runnable {
     private void detectCollision() {
         if (Board.gameState == Board.GameState.PLAY) {
 
-//            detectBallAndPad();
-            
+            detectBallAndPad();
+
             Ball tempBall;
 
-            for (Ball listBall : this.listBalls) {
-                tempBall = listBall;
-                if (tempBall.getBounds().intersects(getPad().getBounds())) {
-                    listBall.bouceVertical();
-                }
-            }
+//            for (Ball listBall : this.listBalls) {
+//                tempBall = listBall;
+//                if (tempBall.getBounds().intersects(getPad().getBounds())) {
+//                    listBall.bouceVertical();
+//                }
+//            }
 
             /*
              Prolazimo kroz sve objekte meta i ispituje da li se poklapaju sa lopticom.
              U slucaju poklapanja testiramo koja je boja i u zavisnosti toga dodeljujemo odredjen broj bodova.
              Kasnije se pogodjena meta uklanja iz liste.
              */
-            
             Target tempTarget = null;
             tempBall = null;
-            
+
             for (int i = 0; i < this.listTargets.size(); i++) {
                 tempTarget = this.listTargets.get(i);
 
                 for (int j = 0; j < this.listBalls.size(); j++) {
-                    
+
                     tempBall = this.listBalls.get(j);
-                    
+
                     if (tempTarget.getBounds().intersects(tempBall.getBounds())) {
-                        
-                        
+
                         if (tempTarget.getColor() == Color.LIGHT_GRAY) {
                             this.board.countScore(1);
                         } else if (tempTarget.getColor() == Color.BLUE) {
@@ -121,8 +113,8 @@ public class TargetThread implements Runnable {
                         this.board.invalidate();
 
                         this.listTargets.remove(i);
-                        getBall().bouceVertical();
-                        
+                        tempBall.bouceVertical();
+
                         break;
                     }
                 }
@@ -130,13 +122,41 @@ public class TargetThread implements Runnable {
             }
 
             //U slucaju da je pogodjena zadanja meta, zaustavlja se igrica i korisniku se cestita na pobedi.
-            if (this.listTargets.size() == 0) {
+            if (this.listTargets.isEmpty()) {
                 this.board.newLevelMessage("Čestitamo!!! Prošli ste " + this.board.getLevel() + " level. Vaš skor je " + this.board.getMyScore() + ".\n\rPritisnite bilo koji taster za sljedeći nivo.");
                 int number = this.board.getLevel();
                 this.board.setLevel(++number);
             }
 
         }
+    }
+
+    public void restartBalls() {
+
+        if (this.listBalls != null && this.listBalls.size() > 0) {
+            for (Ball ball : this.listBalls) {
+
+                ball.terminateThread();
+//            ball.getThreadBall().interrupt();
+
+                this.board.remove(ball);
+            }
+        }
+
+        this.listBalls = null;
+        this.listBalls = new ArrayList<>();
+
+        Ball ball = new Ball(this.board);
+        ball.reset();
+
+        this.listBalls.add(ball);
+
+        ball.startThread();
+
+        this.board.add(ball);
+
+//        if(!ball.getRunningBall())
+//            this.getBall().getThreadBall().start();
     }
 
     /**
@@ -270,20 +290,6 @@ public class TargetThread implements Runnable {
      */
     public void setStartCollision(Boolean startCollision) {
         this.startCollision = startCollision;
-    }
-
-    /**
-     * @return the ball
-     */
-    public Ball getBall() {
-        return ball;
-    }
-
-    /**
-     * @param ball the ball to set
-     */
-    public void setBall(Ball ball) {
-        this.ball = ball;
     }
 
     /**
