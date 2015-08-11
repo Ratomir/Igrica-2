@@ -10,7 +10,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
@@ -37,6 +36,20 @@ class Board extends JPanel implements Runnable
      */
     public void setLevel(int level) {
         this.level = level;
+    }
+
+    /**
+     * @return the targetThread
+     */
+    public TargetThread getTargetThread() {
+        return targetThread;
+    }
+
+    /**
+     * @param targetThread the targetThread to set
+     */
+    public void setTargetThread(TargetThread targetThread) {
+        this.targetThread = targetThread;
     }
 
     public static enum GameState { INIT, PLAY, WON, LOSS, NEXTLEVEL }
@@ -118,10 +131,19 @@ class Board extends JPanel implements Runnable
     {
         gameState = GameState.PLAY;
         
-        if(this.targetThread.getListTargets() != null && this.targetThread.getListTargets().size() > 0)
+        if(this.getTargetThread().getListTargets() != null && this.getTargetThread().getListTargets().size() > 0)
         {
-            for (int i = 0; i < this.targetThread.getListTargets().size(); i++) {
-                this.remove(this.targetThread.getListTargets().get(i));
+            for (int i = 0; i < this.getTargetThread().getListTargets().size(); i++) {
+                this.remove(this.getTargetThread().getListTargets().get(i));
+            }
+            
+            this.getTargetThread().getListBalls().add(ball);
+        }
+        
+        if(this.getTargetThread().getListBalls() != null && this.getTargetThread().getListBalls().size() > 0)
+        {
+            for (int i = 0; i < this.getTargetThread().getListBalls().size(); i++) {
+                this.remove(this.getTargetThread().getListBalls().get(i));
             }
         }
         
@@ -129,12 +151,12 @@ class Board extends JPanel implements Runnable
         this.level = 1;
         setNumberOfLife(5);
         
-        targetThread.generateTargets();
+        getTargetThread().generateTargets();
         
-        int numberOfTargets = targetThread.getListTargets().size();
+        int numberOfTargets = getTargetThread().getListTargets().size();
         
         for (int i = 0; i < numberOfTargets; i++) {
-            this.add(targetThread.getListTargets().get(i));
+            this.add(getTargetThread().getListTargets().get(i));
         }
         
         ball.reset();
@@ -156,12 +178,12 @@ class Board extends JPanel implements Runnable
         
         pad.reset();
         
-        this.targetThread.generateTargets();
+        this.getTargetThread().generateTargets();
         
-        int numberOfTargets = targetThread.getListTargets().size();
+        int numberOfTargets = getTargetThread().getListTargets().size();
         
-        for (int i = 0; i < numberOfTargets; i++) {
-            this.add(targetThread.getListTargets().get(i));
+        for (int i = 0; i < getTargetThread().getListTargets().size(); i++) {
+            this.add(getTargetThread().getListTargets().get(i));
         }
     }
     
@@ -192,8 +214,6 @@ class Board extends JPanel implements Runnable
         setMyScore(getMyScore() + number);
     }
     
-    Image img1 = Toolkit.getDefaultToolkit().getImage("arkanoid//question.png");
-
     /**
      * Funckija vrsi iscrtavanje osnovnih parametara prozora, kao sto su loptica, reket, poruke za bodove i zivote, kao i mete.
      * 
@@ -224,9 +244,6 @@ class Board extends JPanel implements Runnable
             
             g2.drawString("Broj života: " + getNumberOfLife(), PANEL_WIDTH-160, 20);
 
-            g2.drawImage(img1, 150, 150, 45, 20, this);
-g2.finalize();
-            
             // Sinhronizovanje sa grafickom kartom
             Toolkit.getDefaultToolkit().sync();
 

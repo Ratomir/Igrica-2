@@ -11,40 +11,42 @@ import javax.swing.JPanel;
 
 /**
  *
- * Klasa Ball nasleđuje klasu Rectangle.Double i implementira interface GameObject.
- * 
+ * Klasa Ball nasleđuje klasu Rectangle.Double i implementira interface
+ * GameObject.
+ *
  * @author Ratomir
  */
 public class Ball extends JPanel implements GameObject, Runnable {
+
     private final int w = 24;
     private final int h = 24;
-    
+
     // Minimalni, maksimalni intenzitet brzine lopte i korak ubrzanja
-    private final int DX = 4;    
+    private final int DX = 4;
     private final int DY = 4;
-    
+
     // Predstavljaju intenzitet po x i po y koordinati
     private int dx;
     private int dy;
-    
+
     // Predstavljaju smer po x i po y koordinati
     private int directionX;
     private int directionY;
-    
+
     private Board board;
     private Ellipse2D.Double ellipseForDrawing = new Ellipse2D.Double();
-    
+
     private Color fillColor = Color.RED;
     private Color borderColor = Color.BLACK;
-    
+
     private Boolean runningBall = true;
     private Thread threadBall;
     private Point position;
 
     /**
-     * Inicijalizuje loptu na tabli.
-     * Postavlja lopticu odmah iznad reketa i postavlja brzinu na minimum.
-     * 
+     * Inicijalizuje loptu na tabli. Postavlja lopticu odmah iznad reketa i
+     * postavlja brzinu na minimum.
+     *
      * @param board Tabla kojoj lopta pripada.
      */
     public Ball(Board board) {
@@ -57,86 +59,87 @@ public class Ball extends JPanel implements GameObject, Runnable {
         threadBall = new Thread(this);
         threadBall.start();
     }
-    
+
     /**
      * Menja smer lopte po x osi.
      */
     public void bouceHorizontal() {
         directionX = -directionX;
     }
-    
+
     /**
      * Menja smer lopte po y osi.
      */
     public void bouceVertical() {
         directionY = -directionY;
     }
-    
+
     /**
      * Resetuje poziciju lopte i postavlja je na pocetnu poziciju.
      */
     public void reset() {
-        this.setLocation(Board.PANEL_WIDTH/2 - w/2, Board.PANEL_HEIGHT - Pad.getH() - h);
-        
+        this.setLocation(Board.PANEL_WIDTH / 2 - w / 2, Board.PANEL_HEIGHT - Pad.getH() - h-250);
+
         dx = DX;
         dy = DY;
     }
-    
+
     /**
-     * Vrsi pomeranje lopte.
-     * Ispituje poziciji lopte.
+     * Vrsi pomeranje lopte. Ispituje poziciji lopte.
      */
-    public void move() 
-    {
+    public void move() {
         position = this.getLocation();
-        int tempX = (int)position.getX() + dx * directionX;
-        int tempY = (int)position.getY() + dy * directionY;
+        int tempX = (int) position.getX() + dx * directionX;
+        int tempY = (int) position.getY() + dy * directionY;
         this.setLocation(tempX, tempY);
-        
+
         /*Ako je lokacija od lopte plus njena duzina veca ili jednaka duzini panela ili
-        ako je lokacija lopte manja od 0, vrsi pomeranje horizontalno. */
-        if (tempX + this.getSize().width >= board.PANEL_WIDTH || tempX <= 0)
+         ako je lokacija lopte manja od 0, vrsi pomeranje horizontalno. */
+        if (tempX + this.getSize().width >= board.PANEL_WIDTH || tempX <= 0) {
             bouceHorizontal();
-        
-        //Ako je lopta prosla pored reketa vrsi se smanjivanje broja zivota.
-        if (tempY + this.getSize().width >= board.PANEL_HEIGHT) 
-        {
-            board.setNumberOfLife(board.getNumberOfLife() - 1);
-            
-            if(board.getNumberOfLife() == 0) //testiranje na poslednji zivot
-            {
-                board.stopGame("IGRICA GOTOVA, ZDRAVO!");
-            }
-            else
-            {
-                reset();
-                bouceVertical();
-            }
         }
-        
+
+        //Ako je lopta prosla pored reketa vrsi se smanjivanje broja zivota.
+        if (tempY + this.getSize().width >= board.PANEL_HEIGHT) {
+            
+            if (board.getTargetThread().getListBalls().size() > 1) {
+                board.getTargetThread().getListBalls().remove(this);
+                board.remove(this);
+            } else {
+                
+                board.setNumberOfLife(board.getNumberOfLife() - 1);
+
+                if (board.getNumberOfLife() == 0) //testiranje na poslednji zivot
+                {
+                    board.stopGame("IGRICA GOTOVA, ZDRAVO!");
+                } else {
+                    reset();
+                    bouceVertical();
+                }
+            }
+
+        }
+
         /*
-        Slucaj kada je loptica dosla do vrha prozora.
-        */
-        if(tempY <= 0)
-        {
+         Slucaj kada je loptica dosla do vrha prozora.
+         */
+        if (tempY <= 0) {
             bouceVertical();
         }
     }
-    
+
     @Override
-    public void paint(Graphics g)
-    {
+    public void paint(Graphics g) {
         super.paintComponent(g);
-        
+
         Graphics2D g2 = (Graphics2D) g;
-        
-        if (Board.gameState == Board.GameState.PLAY) 
-        {
+
+        if (Board.gameState == Board.GameState.PLAY) {
             // Saveti pri iscrtavanju
-        
+
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
-            
+
             draw(g2);
 
             // Sinhronizovanje sa grafickom kartom
@@ -146,32 +149,31 @@ public class Ball extends JPanel implements GameObject, Runnable {
             g.dispose();
         }
     }
-    
+
     /**
      * Vrsi iscrtavanje lopte na tabli.
+     *
      * @param g2 Graphics2D objekat na kojem se vrsi iscrtavanje.
      */
     @Override
-    public void draw(Graphics2D g2) 
-    {
-        ellipseForDrawing.setFrame(1, 1, 
-                this.getSize().getWidth()-2, this.getSize().getHeight()-2);
-        
+    public void draw(Graphics2D g2) {
+        ellipseForDrawing.setFrame(1, 1,
+                this.getSize().getWidth() - 2, this.getSize().getHeight() - 2);
+
         g2.setPaint(fillColor); //postavljamo boju
         g2.fill(ellipseForDrawing); //sa postavljenom bojom filujemo objekat
-        
+
         g2.setPaint(borderColor); //postavljamo boju
         g2.draw(ellipseForDrawing); //crtamo lopticu
     }
 
     @Override
     public void run() {
-        
-        while(true) 
-        {
+
+        while (true) {
             move();
             repaint();
-            
+
             try {
                 Thread.sleep(30); //pauziramo izvrsavanje programa
             } catch (InterruptedException ex) {

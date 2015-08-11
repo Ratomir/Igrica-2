@@ -14,7 +14,7 @@ import java.util.Random;
  *
  * @author Ratomir
  */
-public class TargetThread implements Runnable{
+public class TargetThread implements Runnable {
 
     private ArrayList<Target> listTargets = null;
 
@@ -22,26 +22,30 @@ public class TargetThread implements Runnable{
     private Board board;
     private Ball ball;
     private Pad pad;
-    
+
+    private ArrayList<Ball> listBalls = null;
+
     private Boolean startCollision = false;
-    
-    public TargetThread(Board board, Ball ball, Pad pad){
+
+    public TargetThread(Board board, Ball ball, Pad pad) {
         generateTargets();
-        
+
         this.ball = ball;
         this.board = board;
         this.pad = pad;
-        
+
+        this.listBalls = new ArrayList<>();
+        this.listBalls.add(ball);
+
         thread = new Thread(this);
         thread.start();
     }
-    
+
     @Override
     public void run() {
-        while(true) 
-        {
+        while (true) {
             detectCollision();
-            
+
             try {
                 Thread.sleep(30); //pauziramo izvrsavanje programa
             } catch (InterruptedException ex) {
@@ -49,42 +53,67 @@ public class TargetThread implements Runnable{
             }
         }
     }
-    
+
+    public void detectBallAndPad() {
+
+        int numberOfBalls = this.listBalls.size();
+        Ball tempBall;
+
+        for (Ball listBall : this.listBalls) {
+            tempBall = listBall;
+            if (tempBall.getBounds().intersects(getPad().getBounds())) {
+                listBall.bouceVertical();
+            }
+        }
+    }
+
     /**
      * Funkcija detektuje poklapanje loptice sa reketom i loptice sa metom.
      */
-    private void detectCollision()
-    {
-        if(Board.gameState == Board.GameState.PLAY)
-        {
-            if (getBall().getBounds().intersects(getPad().getBounds())) //ako se loptica poklapa sa reketom
-            {
-                getBall().bouceVertical();
+    private void detectCollision() {
+        if (Board.gameState == Board.GameState.PLAY) {
+
+//            detectBallAndPad();
+            
+            Ball tempBall;
+
+            for (Ball listBall : this.listBalls) {
+                tempBall = listBall;
+                if (tempBall.getBounds().intersects(getPad().getBounds())) {
+                    listBall.bouceVertical();
+                }
             }
-            else
-            {
-                /*
-                Prolazimo kroz sve objekte meta i ispituje da li se poklapaju sa lopticom.
-                U slucaju poklapanja testiramo koja je boja i u zavisnosti toga dodeljujemo odredjen broj bodova.
-                Kasnije se pogodjena meta uklanja iz liste.
-                */
 
-                for (int i = 0; i < this.listTargets.size(); i++)
-                {
-                    Target tempTarget = this.listTargets.get(i);
+            /*
+             Prolazimo kroz sve objekte meta i ispituje da li se poklapaju sa lopticom.
+             U slucaju poklapanja testiramo koja je boja i u zavisnosti toga dodeljujemo odredjen broj bodova.
+             Kasnije se pogodjena meta uklanja iz liste.
+             */
+            
+            Target tempTarget = null;
+            tempBall = null;
+            
+            for (int i = 0; i < this.listTargets.size(); i++) {
+                tempTarget = this.listTargets.get(i);
 
-                    if (tempTarget.getBounds().intersects(getBall().getBounds()))
-                    {
-                        if(tempTarget.getColor() == Color.LIGHT_GRAY)
-                        {
+                for (int j = 0; j < this.listBalls.size(); j++) {
+                    
+                    tempBall = this.listBalls.get(j);
+                    
+                    if (tempTarget.getBounds().intersects(tempBall.getBounds())) {
+                        
+                        
+                        if (tempTarget.getColor() == Color.LIGHT_GRAY) {
                             this.board.countScore(1);
-                        }
-                        else if(tempTarget.getColor() == Color.BLUE)
-                        {
+                        } else if (tempTarget.getColor() == Color.BLUE) {
                             this.board.countScore(2);
-                        }
-                        else
-                        {
+                        } else if (tempTarget.getColor() == Color.WHITE) {
+                            Ball newBall = new Ball(board);
+                            newBall.reset();
+                            this.listBalls.add(newBall);
+
+                            this.board.add(newBall);
+                        } else {
                             this.board.countScore(3);
                         }
 
@@ -93,59 +122,56 @@ public class TargetThread implements Runnable{
 
                         this.listTargets.remove(i);
                         getBall().bouceVertical();
+                        
+                        break;
                     }
                 }
 
-                //U slucaju da je pogodjena zadanja meta, zaustavlja se igrica i korisniku se cestita na pobedi.
-                if(this.listTargets.size() == 0)
-                {
-                    this.board.newLevelMessage("Čestitamo!!! Prošli ste " + this.board.getLevel() + " level. Vaš skor je " + this.board.getMyScore() + ".\n\rPritisnite bilo koji taster za sljedeći nivo.");
-                    int number = this.board.getLevel();
-                    this.board.setLevel(++number);
-                }
             }
-        
+
+            //U slucaju da je pogodjena zadanja meta, zaustavlja se igrica i korisniku se cestita na pobedi.
+            if (this.listTargets.size() == 0) {
+                this.board.newLevelMessage("Čestitamo!!! Prošli ste " + this.board.getLevel() + " level. Vaš skor je " + this.board.getMyScore() + ".\n\rPritisnite bilo koji taster za sljedeći nivo.");
+                int number = this.board.getLevel();
+                this.board.setLevel(++number);
+            }
+
         }
     }
+
     /**
      * Funkcija generise mete sa lokaciom i smesta ih u listu.
      */
-    public void generateTargets()
-    {
-         //Lista meta
+    public void generateTargets() {
+        //Lista meta
         this.listTargets = null;
         setListTargets(new ArrayList<Target>());
-        
+
         Random random = new Random();
         int numberOfColor = random.nextInt(3); //biramo jedan slucajan broj do 3 i na osnovu njega stavljamo boju za pravougaonik
-        
-        if(numberOfColor == 1)
-        {
+
+        if (numberOfColor == 1) {
             drawOne();
-        }
-        else if(numberOfColor == 2)
-        {
+        } else if (numberOfColor == 2) {
             drawSecound();
-        }
-        else
-        {
+        } else {
             drawOne();
         }
-        
+
         Target oneQuestionMark = listTargets.get(random.nextInt(listTargets.size()));
         oneQuestionMark.setImage(true);
-        
+        oneQuestionMark.setColor(Color.WHITE);
+
         oneQuestionMark = listTargets.get(random.nextInt(listTargets.size()));
         oneQuestionMark.setImage(true);
+        oneQuestionMark.setColor(Color.WHITE);
     }
-    
-    public void drawOne()
-    {
+
+    public void drawOne() {
         int yLocal = 50;
-        
+
         int xLocal = 50;
-        for (int i = 0; i < 6; i++, xLocal += 125)
-        {
+        for (int i = 0; i < 6; i++, xLocal += 125) {
             getListTargets().add(new Target(xLocal, yLocal));
         }
 
@@ -170,42 +196,36 @@ public class TargetThread implements Runnable{
 //            getListTargets().add(new Target(xLocal, yLocal));
 //        }
     }
-    
-    public void drawSecound()
-    {
+
+    public void drawSecound() {
         int yLocal = 50;
-        
+
         int xLocal = 150;
-        for (int i = 0; i < 4; i++, xLocal += 125)
-        {
+        for (int i = 0; i < 4; i++, xLocal += 125) {
             getListTargets().add(new Target(xLocal, yLocal));
         }
 
         xLocal = 100;
         yLocal += Y_SPACE_TARGET;
-        for (int i = 4; i < 9; i++, xLocal += 125)
-        {
+        for (int i = 4; i < 9; i++, xLocal += 125) {
             getListTargets().add(new Target(xLocal, yLocal));
         }
 
         xLocal = 50;
         yLocal += Y_SPACE_TARGET;
-        for (int i = 9; i < 15; i++, xLocal += 125)
-        {
+        for (int i = 9; i < 15; i++, xLocal += 125) {
             getListTargets().add(new Target(xLocal, yLocal));
         }
 
         xLocal = 100;
         yLocal += Y_SPACE_TARGET;
-        for (int i = 15; i < 20; i++, xLocal += 125)
-        {
+        for (int i = 15; i < 20; i++, xLocal += 125) {
             getListTargets().add(new Target(xLocal, yLocal));
         }
 
         xLocal = 150;
         yLocal += Y_SPACE_TARGET;
-        for (int i = 20; i < 24; i++, xLocal += 125)
-        {
+        for (int i = 20; i < 24; i++, xLocal += 125) {
             getListTargets().add(new Target(xLocal, yLocal));
         }
     }
@@ -279,5 +299,19 @@ public class TargetThread implements Runnable{
     public void setPad(Pad pad) {
         this.pad = pad;
     }
-    
+
+    /**
+     * @return the listBalls
+     */
+    public ArrayList<Ball> getListBalls() {
+        return listBalls;
+    }
+
+    /**
+     * @param listBalls the listBalls to set
+     */
+    public void setListBalls(ArrayList<Ball> listBalls) {
+        this.listBalls = listBalls;
+    }
+
 }
