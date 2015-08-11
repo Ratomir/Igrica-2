@@ -18,10 +18,13 @@ import javax.swing.JPanel;
  *
  * @author Ratomir
  */
-class Pad extends JPanel implements GameObject, Runnable
-{
-    enum MovingState { STANDING, MOVING_LEFT, MOVING_RIGHT }
-    
+class Pad extends JPanel implements GameObject, Runnable {
+
+    enum MovingState {
+
+        STANDING, MOVING_LEFT, MOVING_RIGHT
+    }
+
     /**
      * Sirina reketa
      */
@@ -30,22 +33,24 @@ class Pad extends JPanel implements GameObject, Runnable
      * Visina reketa
      */
     private static int h = 20;
-    
+
     private int dx = 10;
-    
+
     private Board board;
     private MovingState state;
-    
+
     private Color fillColor = Color.BLACK;
-    
+
     private Point position;
     private RoundRectangle2D roundedRectangle = new RoundRectangle2D.Float();
-    
+
     private Thread threadPad;
-    
+
+    private int upDown = 1;
+
     /**
      * Inicijalizuje reket na prosedjenoj lokaciji na tabli.
-     * 
+     *
      * @param board Tabla kojoj reket pripada.
      * @param x x koordinata gornjeg levog temena reketa.
      * @param y y koordinata gornjeg leveg temena reketa.
@@ -56,76 +61,78 @@ class Pad extends JPanel implements GameObject, Runnable
         this.setOpaque(false);
         this.setSize(w, h);
         this.state = MovingState.STANDING;
-        
+
         threadPad = new Thread(this);
         threadPad.start();
     }
-    
+
     /**
      * Postavlja stanje kretanja reketa u desno.
      */
     public void moveRight() {
         setState(MovingState.MOVING_RIGHT);
     }
-    
+
     /**
      * Postavlja stanje kretanja reketa u levo.
      */
     public void moveLeft() {
         setState(MovingState.MOVING_LEFT);
     }
-    
+
     /**
      * Postavlja stanje kretanja reketa u stajanje.
      */
     public void stopMoving() {
         setState(MovingState.STANDING);
     }
-    
+
     /**
      * Izvrsava pomeranje reketa u zavisnosti od stanja.
      */
     public void move() {
         setPosition(this.getLocation());
-        
-        int tempX = (int)getPosition().getX();
-        int tempY = (int)getPosition().getY();
-        
-        if (getState() == MovingState.MOVING_RIGHT)
+
+        int tempX = (int) getPosition().getX();
+        int tempY = (int) getPosition().getY();
+
+        if (getState() == MovingState.MOVING_RIGHT) {
             tempX += getDx();
-        else if (getState() == MovingState.MOVING_LEFT)
+        } else if (getState() == MovingState.MOVING_LEFT) {
             tempX -= getDx();
-        
+        }
+
         if (tempX < 0) //slucaj kada je skroz levo reket
+        {
             tempX = 0;
-        else if (tempX + this.getSize().width > getBoard().PANEL_WIDTH) //slucaj kada je skoz desno
+        } else if (tempX + this.getSize().width > getBoard().PANEL_WIDTH) //slucaj kada je skoz desno
+        {
             tempX = getBoard().PANEL_WIDTH - this.getSize().width;
-        
+        }
+
         this.setLocation(tempX, tempY);
     }
-    
+
     /**
      * Funkcija vrsi resetovanje koordinata za iscrtavanje reketa.
      */
-    public void reset()
-    {
-        this.setLocation(getBoard().PANEL_WIDTH/2 - Pad.getW()/2, Board.PANEL_HEIGHT-Pad.getH()+2);
+    public void reset() {
+        this.setW(100);
+        this.setLocation(getBoard().PANEL_WIDTH / 2 - Pad.getW() / 2, Board.PANEL_HEIGHT - Pad.getH() + 2);
     }
-    
+
     @Override
-    public void paint(Graphics g)
-    {
+    public void paint(Graphics g) {
         super.paintComponent(g);
-        
+
         Graphics2D g2 = (Graphics2D) g;
-        
-        if (Board.gameState == Board.GameState.PLAY) 
-        {
+
+        if (Board.gameState == Board.GameState.PLAY) {
             // Saveti pri iscrtavanju
-        
+
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
-            
+
             draw(g2);
 
             // Sinhronizovanje sa grafickom kartom
@@ -135,20 +142,20 @@ class Pad extends JPanel implements GameObject, Runnable
             g.dispose();
         }
     }
-    
+
     /**
      * Iscrtava reket na tabli.
-     * 
+     *
      * @param g2 Graphics2D objekat na kome se vrsi iscrtavanje.
      */
     public void draw(Graphics2D g2) {
         setRoundedRectangle(new RoundRectangle2D.Float(1, 1, getW() - 2, getH() - 2, 10, 10));
-        
+
         g2.setPaint(getFillColor());
         g2.fill(getRoundedRectangle());
         g2.draw(getRoundedRectangle()); //crtamo reket
     }
-    
+
     @Override
     public void terminateThread() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -158,15 +165,26 @@ class Pad extends JPanel implements GameObject, Runnable
     public void startThread() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
+    public void update() {
+        if (this.board.getLevel() % 2 == 0) {
+           if(getW() == 50)
+               upDown = 1;
+           else if(getW() == 100)
+               upDown = -1;
+           
+           setW(getW() + upDown);
+        }
+    }
+
     @Override
     public void run() {
-        
-        while(true) 
-        {
+
+        while (true) {
             move();
+            update();
             repaint();
-            
+
             try {
                 Thread.sleep(30); //pauziramo izvrsavanje programa
             } catch (InterruptedException ex) {
@@ -174,7 +192,7 @@ class Pad extends JPanel implements GameObject, Runnable
             }
         }
     }
-    
+
     /**
      * @return the w
      */

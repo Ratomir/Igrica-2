@@ -50,12 +50,8 @@ public class TargetThread implements Runnable {
 
     public void detectBallAndPad() {
 
-        int numberOfBalls = this.listBalls.size();
-        Ball tempBall;
-
         for (Ball listBall : this.listBalls) {
-            tempBall = listBall;
-            if (tempBall.getBounds().intersects(getPad().getBounds())) {
+            if (listBall.getBounds().intersects(getPad().getBounds())) {
                 listBall.bouceVertical();
             }
         }

@@ -5,10 +5,12 @@
  */
 package arkanoid;
 
+import static arkanoid.Pad.getW;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.geom.RoundRectangle2D;
@@ -17,82 +19,83 @@ import javax.swing.JPanel;
 
 /**
  * Klasa Target implementira interface GameObject.
- * 
+ *
  * @author Ratomir
  */
-public class Target extends JPanel implements GameObject
-{
+public class Target extends JPanel implements GameObject {
+
     //Duzina, visina izmedju pravougaonika.
-    public static final float WIDTH = 81;
-    public static final float HEIGHT = 26;
-    
+    private float WIDTH = 81;
+    private float HEIGHT = 26;
+
     public RoundRectangle2D.Float ellipseForDrawing = null;
-    
+
     //lokacija pravougaonika
     float locationX;
     float locationY;
-    
+
     //boja za pravougaonik
     private Color color = null;
-    
-    Image img1 = Toolkit.getDefaultToolkit().getImage("src/arkanoid/question.png");
-    
+
+    Image img1 = Toolkit.getDefaultToolkit().getImage("src/img/question.png");
+
     private Boolean image = false;
+
+    private int upDown = 1;
     
     /**
      * Konstruktor koji na osnovu koordinata kreira zakrivljeni pravougaonik.
-     * 
+     *
      * @param x x koordinata na kojoj se iscrtava pravougaonik
      * @param y y koordinata na kojoj se iscrtava pravougaonik
      */
-    public Target(int x, int y)
-    {
+    public Target(int x, int y) {
         locationX = x;
         locationY = y;
-        
+
         this.setLocation(x, y);
-        this.setSize((int)WIDTH, (int)HEIGHT);
-        
+        this.setSize((int) WIDTH, (int) HEIGHT);
+
         this.setOpaque(false);
-        
-        this.ellipseForDrawing = new RoundRectangle2D.Float(0, 0, WIDTH-1, HEIGHT-1, 10, 10);
-        
+
+        this.ellipseForDrawing = new RoundRectangle2D.Float(0, 0, getWIDTH() - 1, getHEIGHT() - 1, 10, 10);
+
         Random random = new Random();
         int numberOfColor = random.nextInt(3); //biramo jedan slucajan broj do 3 i na osnovu njega stavljamo boju za pravougaonik
-        
-        if(numberOfColor == 1)
-        {
+
+        if (numberOfColor == 1) {
             color = Color.LIGHT_GRAY;
-        }
-        else if(numberOfColor == 2)
-        {
+        } else if (numberOfColor == 2) {
             color = Color.BLUE;
-        }
-        else
-        {
+        } else {
             color = Color.GREEN;
         }
     }
-    
+
     @Override
-    public void move()
-    {
+    public void move() {
+        if (getWIDTH() == 81) {
+            upDown = -1;
+        } else if (getWIDTH() == 75) {
+            upDown = 1;
+        }
+        
+        this.setWIDTH(getWIDTH() + upDown);
+        this.setHEIGHT(getHEIGHT() + upDown);
     }
-    
-     @Override
-    public void paint(Graphics g)
-    {
+
+    @Override
+    public void paint(Graphics g) {
         super.paintComponent(g);
-        
+
         Graphics2D g2 = (Graphics2D) g;
-        
-        if (Board.gameState == Board.GameState.PLAY) 
-        {
+
+        if (Board.gameState == Board.GameState.PLAY) {
             // Saveti pri iscrtavanju
-        
+
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
-            
+
             draw(g2);
 
             // Sinhronizovanje sa grafickom kartom
@@ -102,49 +105,46 @@ public class Target extends JPanel implements GameObject
             g.dispose();
         }
     }
-    
+
     /**
      * Funkcija vrsi iscrtavanje pravougaonika za metu.
-     * 
+     *
      * @param g2 Graphics2D objekat na kome se vrsi iscrtavanje.
      */
     @Override
-    public void draw(Graphics2D g2)
-    {
-        if(getImage()){
+    public void draw(Graphics2D g2) {
+        if (getImage()) {
             g2.setPaint(Color.WHITE);
-            g2.fill(ellipseForDrawing); 
-            
-            g2.setPaint(Color.BLACK);
-            g2.draw(ellipseForDrawing);
-            
-            g2.drawImage(img1, (int)WIDTH/2 - 12, 2, this);
-        }
-        else
-        {
-           g2.setPaint(getColor());
-           g2.fill(ellipseForDrawing); 
-           
-           g2.setPaint(Color.BLACK);
-           g2.draw(ellipseForDrawing);
+            g2.fill(ellipseForDrawing);
+
+            g2.drawImage(img1, (int) getWIDTH() / 2 - 8, 4, 16, 16,this);
+        } else {
+
+            if (this.getColor() == Color.GREEN) {
+                move();
+            }
+
+            g2.setPaint(getColor());
+            g2.fill(ellipseForDrawing);
         }
         
-        
+        this.ellipseForDrawing = new RoundRectangle2D.Float(0, 0, getWIDTH() - 1, getHEIGHT() - 1, 10, 10);
+
+        g2.setPaint(Color.BLACK);
+        g2.draw(ellipseForDrawing);
     }
 
     /**
      * @return the color
      */
-    public Color getColor()
-    {
+    public Color getColor() {
         return color;
     }
 
     /**
      * @param color the color to set
      */
-    public void setColor(Color color)
-    {
+    public void setColor(Color color) {
         this.color = color;
     }
 
@@ -171,5 +171,32 @@ public class Target extends JPanel implements GameObject
     public void setImage(Boolean image) {
         this.image = image;
     }
-    
+
+    /**
+     * @return the WIDTH
+     */
+    public float getWIDTH() {
+        return WIDTH;
+    }
+
+    /**
+     * @param WIDTH the WIDTH to set
+     */
+    public void setWIDTH(float WIDTH) {
+        this.WIDTH = WIDTH;
+    }
+
+    /**
+     * @return the HEIGHT
+     */
+    public float getHEIGHT() {
+        return HEIGHT;
+    }
+
+    /**
+     * @param HEIGHT the HEIGHT to set
+     */
+    public void setHEIGHT(float HEIGHT) {
+        this.HEIGHT = HEIGHT;
+    }
 }

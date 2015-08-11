@@ -78,7 +78,7 @@ public class Ball extends JPanel implements GameObject, Runnable {
      * Resetuje poziciju lopte i postavlja je na pocetnu poziciju.
      */
     public void reset() {
-        this.setLocation(Board.PANEL_WIDTH / 2 - w / 2, Board.PANEL_HEIGHT - Pad.getH() - h-250);
+        this.setLocation(Board.PANEL_WIDTH / 2 - w / 2, Board.PANEL_HEIGHT - Pad.getH() - h - 250);
 
         this.dx = DX;
         this.dy = DY;
@@ -102,14 +102,14 @@ public class Ball extends JPanel implements GameObject, Runnable {
 
         //Ako je lopta prosla pored reketa vrsi se smanjivanje broja zivota.
         if (tempY + this.getSize().width >= board.PANEL_HEIGHT) {
-            
+
             if (board.getTargetThread().getListBalls().size() > 1) {
                 board.getTargetThread().getListBalls().remove(this);
                 board.remove(this);
 //                this.getThreadBall().interrupt();
                 this.terminateThread();
             } else {
-                
+
                 board.setNumberOfLife(board.getNumberOfLife() - 1);
 
                 if (board.getNumberOfLife() == 0) //testiranje na poslednji zivot
@@ -174,8 +174,10 @@ public class Ball extends JPanel implements GameObject, Runnable {
     public void run() {
 
         while (getRunningBall()) {
-            move();
-            repaint();
+            if (Board.gameState == Board.GameState.PLAY) {
+                move();
+                repaint();
+            }
 
             try {
                 Thread.sleep(30); //pauziramo izvrsavanje programa
