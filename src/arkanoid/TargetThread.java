@@ -131,6 +131,12 @@ public class TargetThread implements Runnable{
         {
             drawOne();
         }
+        
+        Target oneQuestionMark = listTargets.get(random.nextInt(listTargets.size()));
+        oneQuestionMark.setImage(true);
+        
+        oneQuestionMark = listTargets.get(random.nextInt(listTargets.size()));
+        oneQuestionMark.setImage(true);
     }
     
     public void drawOne()

@@ -8,6 +8,7 @@ package arkanoid;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.geom.RoundRectangle2D;
@@ -33,6 +34,10 @@ public class Target extends JPanel implements GameObject
     
     //boja za pravougaonik
     private Color color = null;
+    
+    Image img1 = Toolkit.getDefaultToolkit().getImage("arkanoid/question.png");
+    
+    private Boolean image = false;
     
     /**
      * Konstruktor koji na osnovu koordinata kreira zakrivljeni pravougaonik.
@@ -106,11 +111,25 @@ public class Target extends JPanel implements GameObject
     @Override
     public void draw(Graphics2D g2)
     {
-        g2.setPaint(getColor());
-        g2.fill(ellipseForDrawing);
+        if(getImage()){
+            g2.setPaint(Color.WHITE);
+            g2.fill(ellipseForDrawing); 
+            
+            g2.setPaint(Color.BLACK);
+            g2.draw(ellipseForDrawing);
+            
+            g2.drawImage(img1, 0, 2, 20, 20, this);
+        }
+        else
+        {
+           g2.setPaint(getColor());
+           g2.fill(ellipseForDrawing); 
+           
+           g2.setPaint(Color.BLACK);
+           g2.draw(ellipseForDrawing);
+        }
         
-        g2.setPaint(Color.BLACK);
-        g2.draw(ellipseForDrawing);
+        
     }
 
     /**
@@ -137,6 +156,20 @@ public class Target extends JPanel implements GameObject
     @Override
     public void startThread() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    /**
+     * @return the image
+     */
+    public Boolean getImage() {
+        return image;
+    }
+
+    /**
+     * @param image the image to set
+     */
+    public void setImage(Boolean image) {
+        this.image = image;
     }
     
 }

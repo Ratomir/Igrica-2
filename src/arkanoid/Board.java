@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
@@ -191,6 +192,8 @@ class Board extends JPanel implements Runnable
         setMyScore(getMyScore() + number);
     }
     
+    Image img1 = Toolkit.getDefaultToolkit().getImage("arkanoid//question.png");
+
     /**
      * Funckija vrsi iscrtavanje osnovnih parametara prozora, kao sto su loptica, reket, poruke za bodove i zivote, kao i mete.
      * 
@@ -206,14 +209,12 @@ class Board extends JPanel implements Runnable
         if (gameState == GameState.PLAY) 
         {
             // Saveti pri iscrtavanju
-        
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
 
             // Iscrtaj rezultat
 
             g2.drawString("" + getMyScore(), 10, 20);
-            
             
             //Iscrtaj trenutni level
             
@@ -223,6 +224,9 @@ class Board extends JPanel implements Runnable
             
             g2.drawString("Broj života: " + getNumberOfLife(), PANEL_WIDTH-160, 20);
 
+            g2.drawImage(img1, 150, 150, 45, 20, this);
+g2.finalize();
+            
             // Sinhronizovanje sa grafickom kartom
             Toolkit.getDefaultToolkit().sync();
 
