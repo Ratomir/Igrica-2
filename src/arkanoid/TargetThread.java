@@ -8,6 +8,7 @@ package arkanoid;
 import static arkanoid.Board.Y_SPACE_TARGET;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  *
@@ -32,11 +33,12 @@ public class TargetThread implements Runnable{
         this.pad = pad;
         
         thread = new Thread(this);
+        thread.start();
     }
     
     @Override
     public void run() {
-        while(this.getStartCollision()) 
+        while(true) 
         {
             detectCollision();
             
@@ -53,52 +55,56 @@ public class TargetThread implements Runnable{
      */
     private void detectCollision()
     {
-        if (ball.getBounds().intersects(pad.getBounds())) //ako se loptica poklapa sa reketom
+        if(Board.gameState == Board.GameState.PLAY)
         {
-            ball.bouceVertical();
-        }
-        else
-        {
-            /*
-            Prolazimo kroz sve objekte meta i ispituje da li se poklapaju sa lopticom.
-            U slucaju poklapanja testiramo koja je boja i u zavisnosti toga dodeljujemo odredjen broj bodova.
-            Kasnije se pogodjena meta uklanja iz liste.
-            */
-
-            for (int i = 0; i < this.listTargets.size(); i++)
+            if (getBall().getBounds().intersects(getPad().getBounds())) //ako se loptica poklapa sa reketom
             {
-                Target tempTarget = this.listTargets.get(i);
+                getBall().bouceVertical();
+            }
+            else
+            {
+                /*
+                Prolazimo kroz sve objekte meta i ispituje da li se poklapaju sa lopticom.
+                U slucaju poklapanja testiramo koja je boja i u zavisnosti toga dodeljujemo odredjen broj bodova.
+                Kasnije se pogodjena meta uklanja iz liste.
+                */
 
-                if (tempTarget.getBounds().intersects(ball.getBounds()))
+                for (int i = 0; i < this.listTargets.size(); i++)
                 {
-                    if(tempTarget.getColor() == Color.LIGHT_GRAY)
+                    Target tempTarget = this.listTargets.get(i);
+
+                    if (tempTarget.getBounds().intersects(getBall().getBounds()))
                     {
-                        this.board.countScore(1);
+                        if(tempTarget.getColor() == Color.LIGHT_GRAY)
+                        {
+                            this.board.countScore(1);
+                        }
+                        else if(tempTarget.getColor() == Color.BLUE)
+                        {
+                            this.board.countScore(2);
+                        }
+                        else
+                        {
+                            this.board.countScore(3);
+                        }
+
+                        this.board.remove(this.listTargets.get(i));
+                        this.board.invalidate();
+
+                        this.listTargets.remove(i);
+                        getBall().bouceVertical();
                     }
-                    else if(tempTarget.getColor() == Color.BLUE)
-                    {
-                        this.board.countScore(2);
-                    }
-                    else
-                    {
-                        this.board.countScore(3);
-                    }
-                    
-                    this.board.remove(this.listTargets.get(i));
-                    this.board.invalidate();
-                    
-                    this.listTargets.remove(i);
-                    ball.bouceVertical();
+                }
+
+                //U slucaju da je pogodjena zadanja meta, zaustavlja se igrica i korisniku se cestita na pobedi.
+                if(this.listTargets.size() == 0)
+                {
+                    this.board.newLevelMessage("Čestitamo!!! Prošli ste " + this.board.getLevel() + " level. Vaš skor je " + this.board.getMyScore() + ".\n\rPritisnite bilo koji taster za sljedeći nivo.");
+                    int number = this.board.getLevel();
+                    this.board.setLevel(++number);
                 }
             }
-
-            //U slucaju da je pogodjena zadanja meta, zaustavlja se igrica i korisniku se cestita na pobedi.
-            if(this.listTargets.size() == 0)
-            {
-                this.board.newLevelMessage("Čestitamo!!! Prošli ste " + this.board.getLevel() + ". Vaš skor je " + this.board.getMyScore() + ".");
-                int number = this.board.getLevel();
-                this.board.setLevel(number++);
-            }
+        
         }
     }
     /**
@@ -107,9 +113,24 @@ public class TargetThread implements Runnable{
     public void generateTargets()
     {
          //Lista meta
+        this.listTargets = null;
         setListTargets(new ArrayList<Target>());
         
-        drawOne();
+        Random random = new Random();
+        int numberOfColor = random.nextInt(3); //biramo jedan slucajan broj do 3 i na osnovu njega stavljamo boju za pravougaonik
+        
+        if(numberOfColor == 1)
+        {
+            drawOne();
+        }
+        else if(numberOfColor == 2)
+        {
+            drawSecound();
+        }
+        else
+        {
+            drawOne();
+        }
     }
     
     public void drawOne()
@@ -117,7 +138,7 @@ public class TargetThread implements Runnable{
         int yLocal = 50;
         
         int xLocal = 50;
-        for (int i = 0; i < 1; i++, xLocal += 125)
+        for (int i = 0; i < 6; i++, xLocal += 125)
         {
             getListTargets().add(new Target(xLocal, yLocal));
         }
@@ -223,6 +244,34 @@ public class TargetThread implements Runnable{
      */
     public void setStartCollision(Boolean startCollision) {
         this.startCollision = startCollision;
+    }
+
+    /**
+     * @return the ball
+     */
+    public Ball getBall() {
+        return ball;
+    }
+
+    /**
+     * @param ball the ball to set
+     */
+    public void setBall(Ball ball) {
+        this.ball = ball;
+    }
+
+    /**
+     * @return the pad
+     */
+    public Pad getPad() {
+        return pad;
+    }
+
+    /**
+     * @param pad the pad to set
+     */
+    public void setPad(Pad pad) {
+        this.pad = pad;
     }
     
 }

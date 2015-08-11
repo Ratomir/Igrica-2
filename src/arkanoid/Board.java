@@ -14,7 +14,6 @@ import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.geom.Rectangle2D;
 import javax.swing.JPanel;
 
 /**
@@ -68,7 +67,6 @@ class Board extends JPanel implements Runnable
     
     private Ball ball;
     private Pad pad;
-    private NextLevel nextLevelPanel;
     
     private String message;
     
@@ -101,8 +99,6 @@ class Board extends JPanel implements Runnable
         //dodajemo osluskivac na Board za tastaturu
         addKeyListener(new GameKeyAdapter());
         
-        nextLevelPanel = new NextLevel(this);
-        
         targetThread = new TargetThread(this, ball, pad);
         
         //dodajemo proces za board
@@ -121,7 +117,7 @@ class Board extends JPanel implements Runnable
     {
         gameState = GameState.PLAY;
         
-        if(this.targetThread.getListTargets().size() > 0)
+        if(this.targetThread.getListTargets() != null && this.targetThread.getListTargets().size() > 0)
         {
             for (int i = 0; i < this.targetThread.getListTargets().size(); i++) {
                 this.remove(this.targetThread.getListTargets().get(i));
@@ -129,13 +125,10 @@ class Board extends JPanel implements Runnable
         }
         
         setMyScore(0);
-        
+        this.level = 1;
         setNumberOfLife(5);
         
         targetThread.generateTargets();
-        
-        this.add(ball);
-        this.add(pad);
         
         int numberOfTargets = targetThread.getListTargets().size();
         
@@ -143,15 +136,12 @@ class Board extends JPanel implements Runnable
             this.add(targetThread.getListTargets().get(i));
         }
         
-        if(this.targetThread.getStartCollision() == false)
-        {
-            this.targetThread.setStartCollision(true);
-            targetThread.getThread().start();
-        }
-        
         ball.reset();
         
         pad.reset();
+        
+        this.add(ball);
+        this.add(pad);
     }
     
     /**
@@ -161,35 +151,18 @@ class Board extends JPanel implements Runnable
     {
         gameState = GameState.PLAY;
         
-        if(this.targetThread.getListTargets().size() > 0)
-        {
-            for (int i = 0; i < this.targetThread.getListTargets().size(); i++) {
-                this.remove(this.targetThread.getListTargets().get(i));
-            }
-        }
+        ball.reset();
         
-        targetThread.generateTargets();
+        pad.reset();
         
-        this.add(ball);
-        this.add(pad);
+        this.targetThread.generateTargets();
         
         int numberOfTargets = targetThread.getListTargets().size();
         
         for (int i = 0; i < numberOfTargets; i++) {
             this.add(targetThread.getListTargets().get(i));
         }
-        
-        if(this.targetThread.getStartCollision() == false)
-        {
-            this.targetThread.setStartCollision(true);
-            targetThread.getThread().start();
-        }
-        
-        ball.reset();
-        
-        pad.reset();
     }
-    
     
     /**
      * Funkcija postavlja parametre za stopiranje igre.
@@ -206,9 +179,6 @@ class Board extends JPanel implements Runnable
     {
         gameState = GameState.NEXTLEVEL;
         
-         this.removeAll();
-            this.add(nextLevelPanel);
-            this.invalidate();
         this.message = message;
     }
     
@@ -269,12 +239,8 @@ class Board extends JPanel implements Runnable
         }
         else if(gameState == GameState.NEXTLEVEL)
         {
-//            int messageWidth = getFontMetrics(getFont()).stringWidth(message);
-//            g2.drawString(message, PANEL_WIDTH/2 - messageWidth/2, PANEL_HEIGHT/2);
-            
-            this.removeAll();
-            this.add(nextLevelPanel);
-            this.invalidate();
+            int messageWidth = getFontMetrics(getFont()).stringWidth(message);
+            g2.drawString(message, PANEL_WIDTH/2 - messageWidth/2, PANEL_HEIGHT/2);
         }
     }
     
@@ -284,10 +250,8 @@ class Board extends JPanel implements Runnable
     @Override
     public void run()
     {
-        while(gameState == GameState.INIT || gameState == GameState.LOSS || gameState == GameState.PLAY) 
+        while(true) 
         {
-            //update();
-            
             repaint();
 
             try {
@@ -338,12 +302,19 @@ class Board extends JPanel implements Runnable
         @Override
         public void keyPressed(KeyEvent e)
         {
-            int keyCode = e.getKeyCode();
+            if(gameState == GameState.NEXTLEVEL)
+            {
+                newLevel();
+            }
+            else
+            {
+                int keyCode = e.getKeyCode();
             
-            if (keyCode == KeyEvent.VK_LEFT) //dugme lijevo
-                pad.moveLeft();
-            else if (keyCode == KeyEvent.VK_RIGHT) //dugme desno
-                pad.moveRight();
+                if (keyCode == KeyEvent.VK_LEFT) //dugme lijevo
+                    pad.moveLeft();
+                else if (keyCode == KeyEvent.VK_RIGHT) //dugme desno
+                    pad.moveRight();
+            }
         }
 
         /**

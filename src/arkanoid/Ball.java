@@ -167,7 +167,7 @@ public class Ball extends JPanel implements GameObject, Runnable {
     @Override
     public void run() {
         
-        while(runningBall) 
+        while(true) 
         {
             move();
             repaint();

@@ -43,7 +43,6 @@ class Pad extends JPanel implements GameObject, Runnable
     private RoundRectangle2D roundedRectangle = new RoundRectangle2D.Float();
     
     private Thread threadPad;
-    private boolean runningPad = true;
     
     /**
      * Inicijalizuje reket na prosedjenoj lokaciji na tabli.
@@ -164,7 +163,7 @@ class Pad extends JPanel implements GameObject, Runnable
     @Override
     public void run() {
         
-        while(isRunningPad()) 
+        while(true) 
         {
             move();
             repaint();
@@ -173,7 +172,6 @@ class Pad extends JPanel implements GameObject, Runnable
                 Thread.sleep(30); //pauziramo izvrsavanje programa
             } catch (InterruptedException ex) {
                 System.out.println(ex.toString());
-                setRunningPad(false);
             }
         }
     }
@@ -302,19 +300,5 @@ class Pad extends JPanel implements GameObject, Runnable
      */
     public void setThreadPad(Thread threadPad) {
         this.threadPad = threadPad;
-    }
-
-    /**
-     * @return the runningPad
-     */
-    public boolean isRunningPad() {
-        return runningPad;
-    }
-
-    /**
-     * @param runningPad the runningPad to set
-     */
-    public void setRunningPad(boolean runningPad) {
-        this.runningPad = runningPad;
     }
 }
