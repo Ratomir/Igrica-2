@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javax.swing.JPanel;
 import sun.audio.AudioPlayer;
 import sun.audio.AudioStream;
@@ -33,6 +31,34 @@ import sun.audio.AudioStream;
  * @author Ratomir
  */
 class Board extends JPanel implements Runnable {
+
+    /**
+     * @return the tickMessage
+     */
+    public int getTickMessage() {
+        return tickMessage;
+    }
+
+    /**
+     * @param tickMessage the tickMessage to set
+     */
+    public void setTickMessage(int tickMessage) {
+        this.tickMessage = tickMessage;
+    }
+
+    /**
+     * @return the starThread
+     */
+    public StarThread getStarThread() {
+        return starThread;
+    }
+
+    /**
+     * @param starThread the starThread to set
+     */
+    public void setStarThread(StarThread starThread) {
+        this.starThread = starThread;
+    }
 
     public static enum GameState {
 
@@ -66,11 +92,16 @@ class Board extends JPanel implements Runnable {
 
     private String message;
 
+    private String mainMessage;
+
+    private int tickMessage = 0;
+
     //broj zivota
     private int numberOfLife;
 
     final Thread runner;
     private TargetThread targetThread;
+    private StarThread starThread;
 
     public static GameState gameState;
 
@@ -89,7 +120,7 @@ class Board extends JPanel implements Runnable {
         setLayout(null);
         setFont(getFont().deriveFont(Font.BOLD, 18f));
         setDoubleBuffered(true);
-
+        
         message = "ARKANOID";
 
         pad = new Pad(this, PANEL_WIDTH / 2 - Pad.getW() / 2, PANEL_HEIGHT - Pad.getH());
@@ -97,7 +128,9 @@ class Board extends JPanel implements Runnable {
         //dodajemo osluskivac na Board za tastaturu
         addKeyListener(new GameKeyAdapter());
 
-        targetThread = new TargetThread(this, pad);
+        starThread = new StarThread(this);
+
+        targetThread = new TargetThread(this, getPad(), starThread);
 
         //dodajemo proces za board
         runner = new Thread(this);
@@ -133,26 +166,20 @@ class Board extends JPanel implements Runnable {
         this.getTargetThread().generateTargets();
         this.getTargetThread().restartBalls();
 
+        this.starThread.restartStar();
+
         for (int i = 0; i < getTargetThread().getListTargets().size(); i++) {
             this.add(getTargetThread().getListTargets().get(i));
         }
 
-        pad.reset();
+        getPad().reset();
 
         this.add(this.getTargetThread().getListBalls().get(0));
-        this.add(pad);
+        this.add(getPad());
 
-        InputStream inputStream;
-        try {
-            inputStream = new FileInputStream("src/sounds/im_so_ready.wav");
-            AudioStream au = new AudioStream(inputStream);
-            AudioPlayer.player.start(au);
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        playSound("src/sounds/im_so_ready.wav");
 
+        this.setMainMessageAndTick("Srećno!!! :D :P");
     }
 
     /**
@@ -161,7 +188,7 @@ class Board extends JPanel implements Runnable {
     public void newLevel() {
         gameState = GameState.PLAY;
 
-        pad.reset();
+        getPad().reset();
 
         this.getTargetThread().generateTargets();
         this.getTargetThread().restartBalls();
@@ -169,17 +196,10 @@ class Board extends JPanel implements Runnable {
         for (int i = 0; i < getTargetThread().getListTargets().size(); i++) {
             this.add(getTargetThread().getListTargets().get(i));
         }
-        
-        InputStream inputStream;
-        try {
-            inputStream = new FileInputStream("src/sounds/yes-1.wav");
-            AudioStream au = new AudioStream(inputStream);
-            AudioPlayer.player.start(au);
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
+        playSound("src/sounds/yes-1.wav");
+
+        this.setMainMessageAndTick("Novi nivo");
     }
 
     /**
@@ -191,16 +211,8 @@ class Board extends JPanel implements Runnable {
         gameState = GameState.LOSE;
         this.message = message;
 
-        InputStream inputStream;
-        try {
-            inputStream = new FileInputStream("src/sounds/maybe-next-time-huh.wav");
-            AudioStream au = new AudioStream(inputStream);
-            AudioPlayer.player.start(au);
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        playSound("src/sounds/maybe-next-time-huh.wav");
+
     }
 
     public void newLevelMessage(String message) {
@@ -243,6 +255,10 @@ class Board extends JPanel implements Runnable {
             //Iscrtaj broj zivota
             g2.drawString("Broj života: " + getNumberOfLife(), PANEL_WIDTH - 160, 20);
 
+            //Napiši glavnu poruku
+            int messageWidth = getFontMetrics(getFont()).stringWidth(mainMessage);
+            g2.drawString(mainMessage, PANEL_WIDTH / 2 - messageWidth / 2, PANEL_HEIGHT / 2);
+
             // Sinhronizovanje sa grafickom kartom
             Toolkit.getDefaultToolkit().sync();
 
@@ -278,12 +294,25 @@ class Board extends JPanel implements Runnable {
         }
     }
 
+    public void setMainMessageAndTick(String msg) {
+        this.setMainMessage(msg);
+        this.setTickMessage(0);
+    }
+
     /**
      * Funkcija pokrece proces za board.
      */
     @Override
     public void run() {
         while (true) {
+
+            if (this.tickMessage == 67) {
+                this.setMainMessage("");
+                this.tickMessage = -1;
+            } else if (this.tickMessage >= 0 && this.tickMessage < 67) {
+                this.tickMessage++;
+            }
+
             repaint();
 
             try {
@@ -291,6 +320,19 @@ class Board extends JPanel implements Runnable {
             } catch (InterruptedException ex) {
                 System.out.println(ex.toString());
             }
+        }
+    }
+
+    public void playSound(String path) {
+        InputStream inputStream;
+        try {
+            inputStream = new FileInputStream(path);
+            AudioStream au = new AudioStream(inputStream);
+            AudioPlayer.player.start(au);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -350,6 +392,34 @@ class Board extends JPanel implements Runnable {
         this.targetThread = targetThread;
     }
 
+    /**
+     * @return the mainMessage
+     */
+    public String getMainMessage() {
+        return mainMessage;
+    }
+
+    /**
+     * @param mainMessage the mainMessage to set
+     */
+    public void setMainMessage(String mainMessage) {
+        this.mainMessage = mainMessage;
+    }
+
+    /**
+     * @return the pad
+     */
+    public Pad getPad() {
+        return pad;
+    }
+
+    /**
+     * @param pad the pad to set
+     */
+    public void setPad(Pad pad) {
+        this.pad = pad;
+    }
+
     private class GameKeyAdapter extends KeyAdapter {
 
         /**
@@ -369,10 +439,10 @@ class Board extends JPanel implements Runnable {
 
                 if (keyCode == KeyEvent.VK_LEFT) //dugme lijevo
                 {
-                    pad.moveLeft();
+                    getPad().moveLeft();
                 } else if (keyCode == KeyEvent.VK_RIGHT) //dugme desno
                 {
-                    pad.moveRight();
+                    getPad().moveRight();
                 }
             }
         }
@@ -387,7 +457,7 @@ class Board extends JPanel implements Runnable {
             int keyCode = e.getKeyCode();
 
             if (keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_RIGHT) {
-                pad.stopMoving();
+                getPad().stopMoving();
             }
         }
     }

@@ -45,7 +45,7 @@ class Frame extends JFrame {
         }
 
         add(board);
-        
+
         addWindowListener(new WindowController());
 
         setJMenuBar(initMenu());
@@ -73,7 +73,7 @@ class Frame extends JFrame {
         // Napravimo meni
         JMenu gameMenu = new JMenu("START");
         gameMenu.setMnemonic(KeyEvent.VK_S);
-        
+
         // Napravimo stavku za meni
         JMenuItem newGame = new JMenuItem("New game");
         newGame.setMnemonic('N');
@@ -98,5 +98,5 @@ class Frame extends JFrame {
 
         return menuBar;
     }
-    
+
 }

@@ -5,12 +5,10 @@
  */
 package arkanoid;
 
-import static arkanoid.Pad.getW;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.geom.RoundRectangle2D;
@@ -40,9 +38,10 @@ public class Target extends JPanel implements GameObject {
     Image img1 = Toolkit.getDefaultToolkit().getImage("src/img/question.png");
 
     private Boolean image = false;
+    private Boolean bad = false;
 
     private int upDown = 1;
-    
+
     /**
      * Konstruktor koji na osnovu koordinata kreira zakrivljeni pravougaonik.
      *
@@ -79,7 +78,7 @@ public class Target extends JPanel implements GameObject {
         } else if (getWIDTH() == 75) {
             upDown = 1;
         }
-        
+
         this.setWIDTH(getWIDTH() + upDown);
         this.setHEIGHT(getHEIGHT() + upDown);
     }
@@ -117,7 +116,7 @@ public class Target extends JPanel implements GameObject {
             g2.setPaint(Color.WHITE);
             g2.fill(ellipseForDrawing);
 
-            g2.drawImage(img1, (int) getWIDTH() / 2 - 8, 4, 16, 16,this);
+            g2.drawImage(img1, (int) getWIDTH() / 2 - 8, 4, 16, 16, this);
         } else {
 
             if (this.getColor() == Color.GREEN) {
@@ -127,7 +126,7 @@ public class Target extends JPanel implements GameObject {
             g2.setPaint(getColor());
             g2.fill(ellipseForDrawing);
         }
-        
+
         this.ellipseForDrawing = new RoundRectangle2D.Float(0, 0, getWIDTH() - 1, getHEIGHT() - 1, 10, 10);
 
         g2.setPaint(Color.BLACK);
@@ -198,5 +197,19 @@ public class Target extends JPanel implements GameObject {
      */
     public void setHEIGHT(float HEIGHT) {
         this.HEIGHT = HEIGHT;
+    }
+
+    /**
+     * @return the bad
+     */
+    public Boolean getBad() {
+        return bad;
+    }
+
+    /**
+     * @param bad the bad to set
+     */
+    public void setBad(Boolean bad) {
+        this.bad = bad;
     }
 }

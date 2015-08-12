@@ -20,6 +20,34 @@ import javax.swing.JPanel;
  */
 class Pad extends JPanel implements GameObject, Runnable {
 
+    /**
+     * @return the speed
+     */
+    public int getSpeed() {
+        return speed;
+    }
+
+    /**
+     * @param speed the speed to set
+     */
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
+
+    /**
+     * @return the tick
+     */
+    public int getTick() {
+        return tick;
+    }
+
+    /**
+     * @param tick the tick to set
+     */
+    public void setTick(int tick) {
+        this.tick = tick;
+    }
+
     enum MovingState {
 
         STANDING, MOVING_LEFT, MOVING_RIGHT
@@ -47,6 +75,10 @@ class Pad extends JPanel implements GameObject, Runnable {
     private Thread threadPad;
 
     private int upDown = 1;
+
+    private int speed = 30;
+
+    private int tick = 0;
 
     /**
      * Inicijalizuje reket na prosedjenoj lokaciji na tabli.
@@ -168,12 +200,13 @@ class Pad extends JPanel implements GameObject, Runnable {
 
     public void update() {
         if (this.board.getLevel() % 2 == 0) {
-           if(getW() == 50)
-               upDown = 1;
-           else if(getW() == 100)
-               upDown = -1;
-           
-           setW(getW() + upDown);
+            if (getW() == 50) {
+                upDown = 1;
+            } else if (getW() == 100) {
+                upDown = -1;
+            }
+
+            setW(getW() + upDown);
         }
     }
 
@@ -181,12 +214,20 @@ class Pad extends JPanel implements GameObject, Runnable {
     public void run() {
 
         while (true) {
+
+            if (this.getTick() == 8) {
+                this.speed = 30;
+                this.tick = -1;
+            } else if (this.getTick() >= 0 && this.getTick() < 8) {
+                this.setTick(this.getTick() + 1);
+            }
+
             move();
             update();
             repaint();
 
             try {
-                Thread.sleep(30); //pauziramo izvrsavanje programa
+                Thread.sleep(this.speed); //pauziramo izvrsavanje programa
             } catch (InterruptedException ex) {
                 System.out.println(ex.toString());
             }

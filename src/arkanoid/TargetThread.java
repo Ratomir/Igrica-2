@@ -7,16 +7,8 @@ package arkanoid;
 
 import static arkanoid.Board.Y_SPACE_TARGET;
 import java.awt.Color;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import sun.audio.AudioPlayer;
-import sun.audio.AudioStream;
 
 /**
  *
@@ -24,20 +16,28 @@ import sun.audio.AudioStream;
  */
 public class TargetThread implements Runnable {
 
+    private static ArrayList<Ball> listBalls = null;
+
     private ArrayList<Target> listTargets = null;
 
     private Thread thread;
     private Board board;
     private Pad pad;
 
-    private static ArrayList<Ball> listBalls = null;
+    private int yStarPosition = 200;
 
     private Boolean startCollision = false;
 
-    public TargetThread(Board board, Pad pad) {
+    private int hitTarget = 0;
+
+    private StarThread starThread = null;
+
+    public TargetThread(Board board, Pad pad, StarThread starThread) {
 
         this.board = board;
         this.pad = pad;
+
+        this.starThread = starThread;
 
         thread = new Thread(this);
         thread.start();
@@ -60,6 +60,7 @@ public class TargetThread implements Runnable {
 
         for (Ball listBall : this.listBalls) {
             if (listBall.getBounds().intersects(getPad().getBounds())) {
+                this.hitTarget = 0;
                 listBall.bouceVertical();
             }
         }
@@ -73,22 +74,13 @@ public class TargetThread implements Runnable {
 
             detectBallAndPad();
 
-            Ball tempBall;
-
-//            for (Ball listBall : this.listBalls) {
-//                tempBall = listBall;
-//                if (tempBall.getBounds().intersects(getPad().getBounds())) {
-//                    listBall.bouceVertical();
-//                }
-//            }
-
             /*
              Prolazimo kroz sve objekte meta i ispituje da li se poklapaju sa lopticom.
              U slucaju poklapanja testiramo koja je boja i u zavisnosti toga dodeljujemo odredjen broj bodova.
              Kasnije se pogodjena meta uklanja iz liste.
              */
             Target tempTarget = null;
-            tempBall = null;
+            Ball tempBall = null;
 
             for (int i = 0; i < this.listTargets.size(); i++) {
                 tempTarget = this.listTargets.get(i);
@@ -99,31 +91,47 @@ public class TargetThread implements Runnable {
 
                     if (tempTarget.getBounds().intersects(tempBall.getBounds())) {
 
+                        this.hitTarget++;
+
+                        if (getHitTarget() == 3) {
+                            setHitTarget(0);
+                            Star newStar = new Star(5, yStarPosition);
+                            yStarPosition += 20;
+                            this.starThread.getListStart().add(newStar);
+
+                            this.board.add(newStar);
+
+                            this.board.setMainMessageAndTick("Nova zvjezdica! Super! :D");
+                        }
+
                         if (tempTarget.getColor() == Color.LIGHT_GRAY) {
                             this.board.countScore(1);
                         } else if (tempTarget.getColor() == Color.BLUE) {
                             this.board.countScore(2);
                         } else if (tempTarget.getColor() == Color.WHITE) {
-                            Ball newBall = new Ball(board);
-                            newBall.reset();
-                            this.listBalls.add(newBall);
 
-                            if (this.listBalls.size() % 3 == 0) {
-                                InputStream inputStream;
-                                try {
-                                    inputStream = new FileInputStream("src/sounds/yes-hahahaa.wav");
-                                    AudioStream au = new AudioStream(inputStream);
-                                    AudioPlayer.player.start(au);
-                                } catch (FileNotFoundException ex) {
-                                    Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
-                                } catch (IOException ex) {
-                                    Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+                            if (tempTarget.getBad()) {
+                                this.pad.setSpeed(250);
+                                this.pad.setTick(0);
+
+                                this.board.setMainMessageAndTick("Reket je usporen na 2 sekunde.");
+
+                                this.board.playSound("src/sounds/im-in-touble.wav");
+                            } else {
+                                Ball newBall = new Ball(board);
+                                newBall.reset();
+                                this.listBalls.add(newBall);
+
+                                if (this.listBalls.size() % 3 == 0) {
+                                    this.board.playSound("src/sounds/yes-hahahaa.wav");
                                 }
+
+                                this.board.add(newBall);
+
+                                this.listBalls.get(0).setSpeed(this.listBalls.get(0).getSpeed() - 10);
+
+                                this.board.setMainMessageAndTick("Nova loptica! Super! :D");
                             }
-
-                            this.board.add(newBall);
-
-                            this.listBalls.get(0).setSpeed(this.listBalls.get(0).getSpeed() - 10);
 
                         } else {
                             this.board.countScore(3);
@@ -202,9 +210,21 @@ public class TargetThread implements Runnable {
         oneQuestionMark.setImage(true);
         oneQuestionMark.setColor(Color.WHITE);
 
+        int badSuprise = random.nextInt(2);
+
+        if (badSuprise == 0) {
+            oneQuestionMark.setBad(true);
+        }
+
         oneQuestionMark = listTargets.get(random.nextInt(listTargets.size()));
         oneQuestionMark.setImage(true);
         oneQuestionMark.setColor(Color.WHITE);
+
+        badSuprise = random.nextInt(2);
+
+        if (badSuprise == 0) {
+            oneQuestionMark.setBad(true);
+        }
     }
 
     public void drawOne() {
@@ -338,6 +358,20 @@ public class TargetThread implements Runnable {
      */
     public void setListBalls(ArrayList<Ball> listBalls) {
         this.listBalls = listBalls;
+    }
+
+    /**
+     * @return the hitTarget
+     */
+    public int getHitTarget() {
+        return hitTarget;
+    }
+
+    /**
+     * @param hitTarget the hitTarget to set
+     */
+    public void setHitTarget(int hitTarget) {
+        this.hitTarget = hitTarget;
     }
 
 }

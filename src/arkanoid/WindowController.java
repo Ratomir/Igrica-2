@@ -12,7 +12,7 @@ import java.awt.event.WindowListener;
  *
  * @author Ratomir
  */
-public class WindowController implements WindowListener{
+public class WindowController implements WindowListener {
 
     @Override
     public void windowOpened(WindowEvent we) {
@@ -40,8 +40,9 @@ public class WindowController implements WindowListener{
 
     @Override
     public void windowDeactivated(WindowEvent we) {
-        if(Board.gameState != Board.GameState.INIT)
+        if (Board.gameState != Board.GameState.INIT) {
             Board.gameState = Board.GameState.PAUSE;
+        }
     }
-    
+
 }
