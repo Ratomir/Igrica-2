@@ -42,6 +42,8 @@ public class Ball extends JPanel implements GameObject, Runnable {
     private Boolean runningBall = true;
     private Thread threadBall;
     private Point position;
+    
+    private int speed;
 
     /**
      * Inicijalizuje loptu na tabli. Postavlja lopticu odmah iznad reketa i
@@ -55,7 +57,9 @@ public class Ball extends JPanel implements GameObject, Runnable {
         this.directionY = 1;
         this.setOpaque(false);
         this.setSize(w, h);
-
+        
+        this.speed = 40;
+        
         this.threadBall = new Thread(this);
         this.threadBall.start();
     }
@@ -180,7 +184,7 @@ public class Ball extends JPanel implements GameObject, Runnable {
             }
 
             try {
-                Thread.sleep(30); //pauziramo izvrsavanje programa
+                Thread.sleep(speed); //pauziramo izvrsavanje programa
             } catch (InterruptedException ex) {
                 System.out.println(ex.toString());
 //                this.threadBall.interrupt();
@@ -224,5 +228,19 @@ public class Ball extends JPanel implements GameObject, Runnable {
      */
     public void setRunningBall(Boolean runningBall) {
         this.runningBall = runningBall;
+    }
+
+    /**
+     * @return the speed
+     */
+    public int getSpeed() {
+        return speed;
+    }
+
+    /**
+     * @param speed the speed to set
+     */
+    public void setSpeed(int speed) {
+        this.speed = speed;
     }
 }

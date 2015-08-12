@@ -15,7 +15,17 @@ import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javax.swing.JPanel;
+import sun.audio.AudioPlayer;
+import sun.audio.AudioStream;
 
 /**
  * Klasa Board nasledjuje JPanel i implementira interface Runnable.
@@ -131,6 +141,18 @@ class Board extends JPanel implements Runnable {
 
         this.add(this.getTargetThread().getListBalls().get(0));
         this.add(pad);
+
+        InputStream inputStream;
+        try {
+            inputStream = new FileInputStream("src/sounds/im_so_ready.wav");
+            AudioStream au = new AudioStream(inputStream);
+            AudioPlayer.player.start(au);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     /**
@@ -147,6 +169,17 @@ class Board extends JPanel implements Runnable {
         for (int i = 0; i < getTargetThread().getListTargets().size(); i++) {
             this.add(getTargetThread().getListTargets().get(i));
         }
+        
+        InputStream inputStream;
+        try {
+            inputStream = new FileInputStream("src/sounds/yes-1.wav");
+            AudioStream au = new AudioStream(inputStream);
+            AudioPlayer.player.start(au);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -157,6 +190,17 @@ class Board extends JPanel implements Runnable {
     public void stopGame(String message) {
         gameState = GameState.LOSE;
         this.message = message;
+
+        InputStream inputStream;
+        try {
+            inputStream = new FileInputStream("src/sounds/maybe-next-time-huh.wav");
+            AudioStream au = new AudioStream(inputStream);
+            AudioPlayer.player.start(au);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public void newLevelMessage(String message) {

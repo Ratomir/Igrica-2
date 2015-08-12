@@ -7,8 +7,16 @@ package arkanoid;
 
 import static arkanoid.Board.Y_SPACE_TARGET;
 import java.awt.Color;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import sun.audio.AudioPlayer;
+import sun.audio.AudioStream;
 
 /**
  *
@@ -100,7 +108,23 @@ public class TargetThread implements Runnable {
                             newBall.reset();
                             this.listBalls.add(newBall);
 
+                            if (this.listBalls.size() % 3 == 0) {
+                                InputStream inputStream;
+                                try {
+                                    inputStream = new FileInputStream("src/sounds/yes-hahahaa.wav");
+                                    AudioStream au = new AudioStream(inputStream);
+                                    AudioPlayer.player.start(au);
+                                } catch (FileNotFoundException ex) {
+                                    Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+                                } catch (IOException ex) {
+                                    Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
+
                             this.board.add(newBall);
+
+                            this.listBalls.get(0).setSpeed(this.listBalls.get(0).getSpeed() - 10);
+
                         } else {
                             this.board.countScore(3);
                         }

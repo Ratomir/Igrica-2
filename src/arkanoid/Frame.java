@@ -7,6 +7,7 @@ package arkanoid;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -70,10 +71,13 @@ class Frame extends JFrame {
         JMenuBar menuBar = new JMenuBar();
 
         // Napravimo meni
-        JMenu gameMenu = new JMenu("Game");
-
+        JMenu gameMenu = new JMenu("START");
+        gameMenu.setMnemonic(KeyEvent.VK_S);
+        
         // Napravimo stavku za meni
         JMenuItem newGame = new JMenuItem("New game");
+        newGame.setMnemonic('N');
+        newGame.setIcon(new ImageIcon("src/img/start.png"));
 
         /*
          Dodajemo osluskivac na newGame meni stavku.
