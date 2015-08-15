@@ -8,10 +8,9 @@ package arkanoid;
 import java.util.ArrayList;
 
 /**
- *Klasa koja sadrži sve zvjezdice koje se nalaze na ekranu.
- * Kreira proces za iscrtavanje zvjezdica i poziva metodu za crtanje za svaku
- * zvjezdicu.
- * 
+ * Klasa koja sadrži sve zvjezdice koje se nalaze na ekranu. Kreira proces za
+ * iscrtavanje zvjezdica i poziva metodu za crtanje za svaku zvjezdicu.
+ *
  * @author Ratomir
  */
 public class StarThread implements Runnable {
@@ -24,7 +23,7 @@ public class StarThread implements Runnable {
 
     /**
      * Konstruktor klase koji vrši inicijalnizaciju potrebnih parametara.
-     * 
+     *
      * @param board polje za igru
      */
     public StarThread(Board board) {

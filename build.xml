@@ -71,10 +71,4 @@
 
     -->
     
-     <target name="run" depends="Arkanoid-impl.jar">
-            <exec dir="bin" executable="launcher.exe">
-                <arg file="${dist.jar}"/>
-            </exec>
-        </target>
-    
 </project>

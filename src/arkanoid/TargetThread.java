@@ -7,7 +7,6 @@ package arkanoid;
 
 import static arkanoid.Board.Y_SPACE_TARGET;
 import java.awt.Color;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -103,80 +102,82 @@ public class TargetThread implements Runnable {
             Target tempTarget = null;
             Ball tempBall = null;
 
-            for (int i = 0; i < this.listTargets.size(); i++) {
-                tempTarget = this.listTargets.get(i);
+            if (this.listBalls != null) {
+                for (int i = 0; i < this.listTargets.size(); i++) {
+                    tempTarget = this.listTargets.get(i);
 
-                for (int j = 0; j < this.listBalls.size(); j++) {
+                    for (int j = 0; j < this.listBalls.size(); j++) {
 
-                    tempBall = this.listBalls.get(j);
+                        tempBall = this.listBalls.get(j);
 
-                    if (tempTarget.getBounds().intersects(tempBall.getBounds())) {
+                        if (tempTarget.getBounds().intersects(tempBall.getBounds())) {
 
-                        this.hitTarget++;
+                            this.hitTarget++;
 
-                        //Pogođene tri mete za redom, dodaje se zvjezdica
-                        if (getHitTarget() == 3) {
-                            setHitTarget(0);
-                            Star newStar = new Star(5, yStarPosition);
-                            yStarPosition += 20;
-                            this.starThread.getListStart().add(newStar);
+                            //Pogođene tri mete za redom, dodaje se zvjezdica
+                            if (getHitTarget() == 3) {
+                                setHitTarget(0);
+                                Star newStar = new Star(5, yStarPosition);
+                                yStarPosition += 20;
+                                this.starThread.getListStart().add(newStar);
 
-                            this.board.add(newStar);
+                                this.board.add(newStar);
 
-                            this.board.setMainMessageAndTick("Nova zvjezdica! Super! :D");
-                        }
-
-                        if (tempTarget.getColor() == Color.LIGHT_GRAY) {
-                            this.board.countScore(1);
-                        } else if (tempTarget.getColor() == Color.BLUE) {
-                            this.board.countScore(2);
-                        } else if (tempTarget.getColor() == Color.WHITE) {
-
-                            //Pogođena loša meta, usporava se reket
-                            if (tempTarget.getBad()) {
-                                this.pad.setSpeed(250);
-                                this.pad.setTick(0);
-
-                                this.board.setMainMessageAndTick("Reket je usporen na 2 sekunde.");
-       
-                                this.board.playSound("sounds/im-in-touble.wav");
-                            } else {
-                                //Pogođena dobra meta, dodaje se nova loptica
-
-                                Ball newBall = new Ball(board);
-                                newBall.reset();
-                                this.listBalls.add(newBall);
-
-                                if (this.listBalls.size() % 3 == 0) {      
-                                    this.board.playSound("sounds/yes-hahahaa.wav");
-                                }
-
-                                this.board.add(newBall);
-
-                                this.listBalls.get(0).setSpeed(this.listBalls.get(0).getSpeed() - 10);
-
-                                this.board.setMainMessageAndTick("Nova loptica! Super! :D");
+                                this.board.setMainMessageAndTick("Nova zvjezdica! Super! :D");
                             }
 
-                        } else {
-                            this.board.countScore(3);
+                            if (tempTarget.getColor() == Color.LIGHT_GRAY) {
+                                this.board.countScore(1);
+                            } else if (tempTarget.getColor() == Color.BLUE) {
+                                this.board.countScore(2);
+                            } else if (tempTarget.getColor() == Color.WHITE) {
+
+                                //Pogođena loša meta, usporava se reket
+                                if (tempTarget.getBad()) {
+                                    this.pad.setSpeed(250);
+                                    this.pad.setTick(0);
+
+                                    this.board.setMainMessageAndTick("Reket je usporen na 2 sekunde.");
+
+                                    this.board.playSound("sounds/im-in-touble.wav");
+                                } else {
+                                    //Pogođena dobra meta, dodaje se nova loptica
+
+                                    Ball newBall = new Ball(board);
+                                    newBall.reset();
+                                    this.listBalls.add(newBall);
+
+                                    if (this.listBalls.size() % 3 == 0) {
+                                        this.board.playSound("sounds/yes-hahahaa.wav");
+                                    }
+
+                                    this.board.add(newBall);
+
+                                    this.listBalls.get(0).setSpeed(this.listBalls.get(0).getSpeed() - 10);
+
+                                    this.board.setMainMessageAndTick("Nova loptica! Super! :D");
+                                }
+
+                            } else {
+                                this.board.countScore(3);
+                            }
+
+                            //Uklanjanje mete sa polja za igru
+                            this.board.remove(this.listTargets.get(i));
+                            this.board.invalidate();
+
+                            this.listTargets.remove(i);
+                            tempBall.bouceVertical();
+
+                            break;
                         }
-
-                        //Uklanjanje mete sa polja za igru
-                        this.board.remove(this.listTargets.get(i));
-                        this.board.invalidate();
-
-                        this.listTargets.remove(i);
-                        tempBall.bouceVertical();
-
-                        break;
                     }
-                }
 
+                }
             }
 
             //U slucaju da je pogodjena zadanja meta, zaustavlja se igrica i korisniku se cestita na pobedi.
-            if (this.listTargets.isEmpty()) {
+            if (this.listTargets != null && this.listTargets.size() == 0) {
                 this.board.newLevelMessage("Čestitamo!!! Prošli ste " + this.board.getLevel() + " level. Vaš skor je " + this.board.getMyScore() + ".\n\rPritisnite bilo koji taster za sljedeći nivo.");
                 int number = this.board.getLevel();
                 this.board.setLevel(++number);

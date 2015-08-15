@@ -91,7 +91,7 @@ public class Target extends JPanel implements GameObject {
 
     /**
      * Metoda vrši iscrtavanje svake mete na polju za igru.
-     * 
+     *
      * @param g objekat za crtanje
      */
     @Override

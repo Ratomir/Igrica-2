@@ -15,8 +15,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 /**
- *Klasa vrši instanciranje jedne zvjezdice sa sličicom.
- * 
+ * Klasa vrši instanciranje jedne zvjezdice sa sličicom.
+ *
  * @author Ratomir
  */
 public class Star extends JPanel implements GameObject {
@@ -54,7 +54,7 @@ public class Star extends JPanel implements GameObject {
 
     /**
      * Funkcija vrši iscrtavanje zvjezdice
-     * 
+     *
      * @param g objekat za iscrtvanje
      */
     @Override

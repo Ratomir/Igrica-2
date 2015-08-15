@@ -40,8 +40,6 @@ import sun.audio.AudioStream;
  */
 class Board extends JPanel implements Runnable {
 
-   
-
     public static enum GameState {
 
         INIT, PLAY, WON, LOSE, NEXTLEVEL, PAUSE
@@ -106,7 +104,7 @@ class Board extends JPanel implements Runnable {
         setLayout(null);
         setFont(getFont().deriveFont(Font.BOLD, 18f));
         setDoubleBuffered(true);
-        
+
         message = "ARKANOID";
 
         pad = new Pad(this, PANEL_WIDTH / 2 - Pad.getW() / 2, PANEL_HEIGHT - Pad.getH());
@@ -162,7 +160,7 @@ class Board extends JPanel implements Runnable {
 
         this.add(this.getTargetThread().getListBalls().get(0));
         this.add(getPad());
-      
+
         playSound("sounds/im_so_ready.wav");
 
         this.setMainMessageAndTick("Srećno!!! :D :P");
@@ -182,7 +180,7 @@ class Board extends JPanel implements Runnable {
         for (int i = 0; i < getTargetThread().getListTargets().size(); i++) {
             this.add(getTargetThread().getListTargets().get(i));
         }
-        
+
         playSound("sounds/yes-1.wav");
 
         this.setMainMessageAndTick("Novi nivo");
@@ -280,9 +278,9 @@ class Board extends JPanel implements Runnable {
     }
 
     /**
-     * Funkcija postavlja glavnu porku na ekran i postavlja 
-     * tajmer poruke koja će se prikazivati na 0.
-     * 
+     * Funkcija postavlja glavnu porku na ekran i postavlja tajmer poruke koja
+     * će se prikazivati na 0.
+     *
      * @param msg poruka koja se ispisuje
      */
     public void setMainMessageAndTick(String msg) {
@@ -318,10 +316,10 @@ class Board extends JPanel implements Runnable {
         InputStream inputStream;
         try {
             /*
-            inputStream = new FileInputStream(path);
-            AudioStream au = new AudioStream(inputStream);
-            AudioPlayer.player.start(au);
-            */
+             inputStream = new FileInputStream(path);
+             AudioStream au = new AudioStream(inputStream);
+             AudioPlayer.player.start(au);
+             */
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(
                     getClass().getClassLoader().getResource(path));
             Clip clip = AudioSystem.getClip();
@@ -422,7 +420,7 @@ class Board extends JPanel implements Runnable {
         this.pad = pad;
     }
 
-     /**
+    /**
      * @return the tickMessage
      */
     public int getTickMessage() {
@@ -449,7 +447,7 @@ class Board extends JPanel implements Runnable {
     public void setStarThread(StarThread starThread) {
         this.starThread = starThread;
     }
-    
+
     private class GameKeyAdapter extends KeyAdapter {
 
         /**

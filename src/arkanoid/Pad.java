@@ -20,8 +20,6 @@ import javax.swing.JPanel;
  */
 class Pad extends JPanel implements GameObject, Runnable {
 
-    
-
     /**
      * Stanja u kojima se može naći reket.
      */
@@ -176,7 +174,8 @@ class Pad extends JPanel implements GameObject, Runnable {
     }
 
     /**
-     * Funnkcija vršu smanjivanje ili poevećavanje dužine reketa ako je level parni.
+     * Funnkcija vršu smanjivanje ili poevećavanje dužine reketa ako je level
+     * parni.
      */
     public void update() {
         if (this.board.getLevel() % 2 == 0) {
@@ -193,7 +192,7 @@ class Pad extends JPanel implements GameObject, Runnable {
     @Override
     /**
      * Funkcija koja izvršava proces pat thread.
-    */
+     */
     public void run() {
 
         while (true) {
@@ -342,7 +341,7 @@ class Pad extends JPanel implements GameObject, Runnable {
     public void setThreadPad(Thread threadPad) {
         this.threadPad = threadPad;
     }
-    
+
     /**
      * @return the speed
      */

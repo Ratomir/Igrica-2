@@ -9,8 +9,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 /**
- *Klasa predstavlja kontroler za osnovni prozor, Frame.
- * 
+ * Klasa predstavlja kontroler za osnovni prozor, Frame.
+ *
  * @author Ratomir
  */
 public class WindowController implements WindowListener {
@@ -41,6 +41,7 @@ public class WindowController implements WindowListener {
 
     /**
      * Ako prozor nije u fokusu, igirca se pauzira.
+     *
      * @param we Prozor nad kojim se vrši događaj.
      */
     @Override
