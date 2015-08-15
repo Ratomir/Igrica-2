@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.Random;
 
 /**
- *Klasa vrši detekciju preklpanja objekata u igri.
- * Implementira interfejs Runnable i upravlja igricom.
- * 
+ * Klasa vrši detekciju preklpanja objekata u igri. Implementira interfejs
+ * Runnable i upravlja igricom.
+ *
  * @author Ratomir
  */
 public class TargetThread implements Runnable {
@@ -36,7 +36,7 @@ public class TargetThread implements Runnable {
 
     /**
      * Konstruktor klase vrši inicijalizaciju parametara.
-     * 
+     *
      * @param board polje za igru
      * @param pad reket igrača
      * @param starThread zvjezdice
@@ -68,18 +68,22 @@ public class TargetThread implements Runnable {
         }
     }
 
-    
     /**
-     * Funkcija vrši provjeru detekcije preklapanja bilo koje loptice za reketom.
+     * Funkcija vrši provjeru detekcije preklapanja bilo koje loptice za
+     * reketom.
      */
     public void detectBallAndPad() {
 
-        for (Ball listBall : this.listBalls) {
-            if (listBall.getBounds().intersects(getPad().getBounds())) {
-                this.hitTarget = 0;
-                listBall.bouceVertical();
+        if (this.listBalls != null) {
+
+            for (Ball listBall : this.listBalls) {
+                if (listBall.getBounds().intersects(getPad().getBounds())) {
+                    this.hitTarget = 0;
+                    listBall.bouceVertical();
+                }
             }
         }
+
     }
 
     /**
@@ -137,7 +141,7 @@ public class TargetThread implements Runnable {
                                 this.board.playSound("src/sounds/im-in-touble.wav");
                             } else {
                                 //Pogođena dobra meta, dodaje se nova loptica
-                                
+
                                 Ball newBall = new Ball(board);
                                 newBall.reset();
                                 this.listBalls.add(newBall);
@@ -264,22 +268,19 @@ public class TargetThread implements Runnable {
 
         xLocal = 50;
         yLocal += Y_SPACE_TARGET;
-        for (int i = 6; i < 12; i++, xLocal += 125)
-        {
+        for (int i = 6; i < 12; i++, xLocal += 125) {
             getListTargets().add(new Target(xLocal, yLocal));
         }
 
         xLocal = 50;
         yLocal += Y_SPACE_TARGET;
-        for (int i = 12; i < 18; i++, xLocal += 125)
-        {
+        for (int i = 12; i < 18; i++, xLocal += 125) {
             getListTargets().add(new Target(xLocal, yLocal));
         }
 
         xLocal = 50;
         yLocal += Y_SPACE_TARGET;
-        for (int i = 18; i < 24; i++, xLocal += 125)
-        {
+        for (int i = 18; i < 24; i++, xLocal += 125) {
             getListTargets().add(new Target(xLocal, yLocal));
         }
     }
