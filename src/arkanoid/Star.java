@@ -10,6 +10,8 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
+import java.net.URL;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 /**
@@ -27,7 +29,8 @@ public class Star extends JPanel implements GameObject {
     float locationX;
     float locationY;
 
-    Image img1 = Toolkit.getDefaultToolkit().getImage("src/img/star.png");
+    URL img1URL = getClass().getClassLoader().getResource("img/star.png");
+    Image img1 = new ImageIcon(img1URL).getImage();
 
     /**
      * Konstruktor koji na osnovu koordinata kreira zvjezdicu.

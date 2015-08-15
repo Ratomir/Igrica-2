@@ -12,7 +12,9 @@ import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.geom.RoundRectangle2D;
+import java.net.URL;
 import java.util.Random;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 /**
@@ -35,7 +37,8 @@ public class Target extends JPanel implements GameObject {
     //boja za pravougaonik
     private Color color = null;
 
-    Image img1 = Toolkit.getDefaultToolkit().getImage("src/img/question.png");
+    URL img1URL = getClass().getClassLoader().getResource("img/question.png");
+    Image img1 = new ImageIcon(img1URL).getImage();
 
     private Boolean image = false;
     private Boolean bad = false;

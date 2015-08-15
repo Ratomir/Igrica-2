@@ -8,6 +8,7 @@ package arkanoid;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -56,7 +57,8 @@ class Frame extends JFrame {
         setResizable(false);
         setTitle("Arkanoid");
 
-        this.setIconImage(new ImageIcon("src/img/icon.png").getImage());
+        URL resource = getClass().getClassLoader().getResource("img/icon.png");
+        this.setIconImage(new ImageIcon(resource).getImage());
 
         setVisible(true);
     }
@@ -77,7 +79,8 @@ class Frame extends JFrame {
         // Napravimo stavku za meni
         JMenuItem newGame = new JMenuItem("New game");
         newGame.setMnemonic('N');
-        newGame.setIcon(new ImageIcon("src/img/start.png"));
+        URL resource = getClass().getClassLoader().getResource("img/start.png");
+        newGame.setIcon(new ImageIcon(resource));
 
         /*
          Dodajemo osluskivac na newGame meni stavku.

@@ -7,6 +7,7 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.geom.Ellipse2D;
+import java.net.URL;
 import javax.swing.JPanel;
 
 /**
@@ -113,8 +114,8 @@ public class Ball extends JPanel implements GameObject, Runnable {
 //                this.getThreadBall().interrupt();
                 this.terminateThread();
                 
-                if (this.board.getTargetThread().getListBalls().size() == 1) {
-                    this.board.playSound("src/sounds/its-not-that-easy.wav");
+                if (this.board.getTargetThread().getListBalls().size() == 1) {                    
+                    this.board.playSound("sounds/its-not-that-easy.wav");
                 }
                 
             } else {

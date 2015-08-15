@@ -7,6 +7,7 @@ package arkanoid;
 
 import static arkanoid.Board.Y_SPACE_TARGET;
 import java.awt.Color;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -137,8 +138,8 @@ public class TargetThread implements Runnable {
                                 this.pad.setTick(0);
 
                                 this.board.setMainMessageAndTick("Reket je usporen na 2 sekunde.");
-
-                                this.board.playSound("src/sounds/im-in-touble.wav");
+       
+                                this.board.playSound("sounds/im-in-touble.wav");
                             } else {
                                 //Pogođena dobra meta, dodaje se nova loptica
 
@@ -146,8 +147,8 @@ public class TargetThread implements Runnable {
                                 newBall.reset();
                                 this.listBalls.add(newBall);
 
-                                if (this.listBalls.size() % 3 == 0) {
-                                    this.board.playSound("src/sounds/yes-hahahaa.wav");
+                                if (this.listBalls.size() % 3 == 0) {      
+                                    this.board.playSound("sounds/yes-hahahaa.wav");
                                 }
 
                                 this.board.add(newBall);

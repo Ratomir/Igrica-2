@@ -15,12 +15,20 @@ import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import sun.audio.AudioPlayer;
 import sun.audio.AudioStream;
@@ -79,10 +87,14 @@ class Board extends JPanel implements Runnable {
 
     public static GameState gameState;
 
-    Image hello = Toolkit.getDefaultToolkit().getImage("src/img/hello.png");
-    Image nextLevel = Toolkit.getDefaultToolkit().getImage("src/img/next.png");
-    Image gameOver = Toolkit.getDefaultToolkit().getImage("src/img/gameover.png");
-    Image pauseGame = Toolkit.getDefaultToolkit().getImage("src/img/pause.png");
+    URL helloURL = getClass().getClassLoader().getResource("img/hello.png");
+    Image hello = new ImageIcon(helloURL).getImage();
+    URL nextURL = getClass().getClassLoader().getResource("img/next.png");
+    Image nextLevel = new ImageIcon(nextURL).getImage();
+    URL gameOverURL = getClass().getClassLoader().getResource("img/gameover.png");
+    Image gameOver = new ImageIcon(gameOverURL).getImage();
+    URL pauseURL = getClass().getClassLoader().getResource("img/pause.png");
+    Image pauseGame = new ImageIcon(pauseURL).getImage();
 
     /**
      * Osnovni konstruktor koji postavlja osnovna podesavanja prozora za igricu.
@@ -150,8 +162,8 @@ class Board extends JPanel implements Runnable {
 
         this.add(this.getTargetThread().getListBalls().get(0));
         this.add(getPad());
-
-        playSound("src/sounds/im_so_ready.wav");
+      
+        playSound("sounds/im_so_ready.wav");
 
         this.setMainMessageAndTick("Srećno!!! :D :P");
     }
@@ -170,8 +182,8 @@ class Board extends JPanel implements Runnable {
         for (int i = 0; i < getTargetThread().getListTargets().size(); i++) {
             this.add(getTargetThread().getListTargets().get(i));
         }
-
-        playSound("src/sounds/yes-1.wav");
+        
+        playSound("sounds/yes-1.wav");
 
         this.setMainMessageAndTick("Novi nivo");
     }
@@ -184,8 +196,7 @@ class Board extends JPanel implements Runnable {
     public void stopGame(String message) {
         gameState = GameState.LOSE;
         this.message = message;
-
-        playSound("src/sounds/maybe-next-time-huh.wav");
+        playSound("sounds/maybe-next-time-huh.wav");
 
     }
 
@@ -306,12 +317,23 @@ class Board extends JPanel implements Runnable {
     public void playSound(String path) {
         InputStream inputStream;
         try {
+            /*
             inputStream = new FileInputStream(path);
             AudioStream au = new AudioStream(inputStream);
             AudioPlayer.player.start(au);
+            */
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(
+                    getClass().getClassLoader().getResource(path));
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioInputStream);
+            clip.start();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (LineUnavailableException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedAudioFileException ex) {
             Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
