@@ -39,7 +39,7 @@ public class TargetThread implements Runnable {
 
         this.starThread = starThread;
 
-        thread = new Thread(this);
+        thread = new Thread(this, "Target thread");
         thread.start();
     }
 

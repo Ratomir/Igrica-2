@@ -60,7 +60,7 @@ public class Ball extends JPanel implements GameObject, Runnable {
         
         this.speed = 30;
         
-        this.threadBall = new Thread(this);
+        this.threadBall = new Thread(this, "New ball thread");
         this.threadBall.start();
     }
 

@@ -25,7 +25,7 @@ public class StarThread implements Runnable {
 
         this.listStart = new ArrayList<>();
 
-        this.thread = new Thread(this);
+        this.thread = new Thread(this, "Star thread");
         this.thread.start();
     }
 

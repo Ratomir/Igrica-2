@@ -20,33 +20,7 @@ import javax.swing.JPanel;
  */
 class Pad extends JPanel implements GameObject, Runnable {
 
-    /**
-     * @return the speed
-     */
-    public int getSpeed() {
-        return speed;
-    }
-
-    /**
-     * @param speed the speed to set
-     */
-    public void setSpeed(int speed) {
-        this.speed = speed;
-    }
-
-    /**
-     * @return the tick
-     */
-    public int getTick() {
-        return tick;
-    }
-
-    /**
-     * @param tick the tick to set
-     */
-    public void setTick(int tick) {
-        this.tick = tick;
-    }
+    
 
     enum MovingState {
 
@@ -94,7 +68,7 @@ class Pad extends JPanel implements GameObject, Runnable {
         this.setSize(w, h);
         this.state = MovingState.STANDING;
 
-        threadPad = new Thread(this);
+        threadPad = new Thread(this, "Pad thread");
         threadPad.start();
     }
 
@@ -358,5 +332,33 @@ class Pad extends JPanel implements GameObject, Runnable {
      */
     public void setThreadPad(Thread threadPad) {
         this.threadPad = threadPad;
+    }
+    
+    /**
+     * @return the speed
+     */
+    public int getSpeed() {
+        return speed;
+    }
+
+    /**
+     * @param speed the speed to set
+     */
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
+
+    /**
+     * @return the tick
+     */
+    public int getTick() {
+        return tick;
+    }
+
+    /**
+     * @param tick the tick to set
+     */
+    public void setTick(int tick) {
+        this.tick = tick;
     }
 }
