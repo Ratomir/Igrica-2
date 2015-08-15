@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.Random;
 
 /**
- *
+ *Klasa vrši detekciju preklpanja objekata u igri.
+ * Implementira interfejs Runnable i upravlja igricom.
+ * 
  * @author Ratomir
  */
 public class TargetThread implements Runnable {
@@ -32,6 +34,13 @@ public class TargetThread implements Runnable {
 
     private StarThread starThread = null;
 
+    /**
+     * Konstruktor klase vrši inicijalizaciju parametara.
+     * 
+     * @param board polje za igru
+     * @param pad reket igrača
+     * @param starThread zvjezdice
+     */
     public TargetThread(Board board, Pad pad, StarThread starThread) {
 
         this.board = board;
@@ -43,19 +52,26 @@ public class TargetThread implements Runnable {
         thread.start();
     }
 
+    /**
+     * Proces klase koji vrši detekciju.
+     */
     @Override
     public void run() {
         while (true) {
             detectCollision();
 
             try {
-                Thread.sleep(30); //pauziramo izvrsavanje programa
+                Thread.sleep(20); //pauziramo izvrsavanje programa
             } catch (InterruptedException ex) {
                 System.out.println(ex.toString());
             }
         }
     }
 
+    
+    /**
+     * Funkcija vrši provjeru detekcije preklapanja bilo koje loptice za reketom.
+     */
     public void detectBallAndPad() {
 
         for (Ball listBall : this.listBalls) {
@@ -93,6 +109,7 @@ public class TargetThread implements Runnable {
 
                         this.hitTarget++;
 
+                        //Pogođene tri mete za redom, dodaje se zvjezdica
                         if (getHitTarget() == 3) {
                             setHitTarget(0);
                             Star newStar = new Star(5, yStarPosition);
@@ -110,6 +127,7 @@ public class TargetThread implements Runnable {
                             this.board.countScore(2);
                         } else if (tempTarget.getColor() == Color.WHITE) {
 
+                            //Pogođena loša meta, usporava se reket
                             if (tempTarget.getBad()) {
                                 this.pad.setSpeed(250);
                                 this.pad.setTick(0);
@@ -118,6 +136,8 @@ public class TargetThread implements Runnable {
 
                                 this.board.playSound("src/sounds/im-in-touble.wav");
                             } else {
+                                //Pogođena dobra meta, dodaje se nova loptica
+                                
                                 Ball newBall = new Ball(board);
                                 newBall.reset();
                                 this.listBalls.add(newBall);
@@ -137,6 +157,7 @@ public class TargetThread implements Runnable {
                             this.board.countScore(3);
                         }
 
+                        //Uklanjanje mete sa polja za igru
                         this.board.remove(this.listTargets.get(i));
                         this.board.invalidate();
 
@@ -159,6 +180,9 @@ public class TargetThread implements Runnable {
         }
     }
 
+    /**
+     * Metoda restertuje sve loptice koje su bile u igri.
+     */
     public void restartBalls() {
 
         if (this.listBalls != null && this.listBalls.size() > 0) {
@@ -227,6 +251,9 @@ public class TargetThread implements Runnable {
         }
     }
 
+    /**
+     * Prvi način generisanja meta.
+     */
     public void drawOne() {
         int yLocal = 50;
 
@@ -235,28 +262,31 @@ public class TargetThread implements Runnable {
             getListTargets().add(new Target(xLocal, yLocal));
         }
 
-//        xLocal = 50;
-//        yLocal += Y_SPACE_TARGET;
-//        for (int i = 6; i < 12; i++, xLocal += 125)
-//        {
-//            getListTargets().add(new Target(xLocal, yLocal));
-//        }
-//
-//        xLocal = 50;
-//        yLocal += Y_SPACE_TARGET;
-//        for (int i = 12; i < 18; i++, xLocal += 125)
-//        {
-//            getListTargets().add(new Target(xLocal, yLocal));
-//        }
-//
-//        xLocal = 50;
-//        yLocal += Y_SPACE_TARGET;
-//        for (int i = 18; i < 24; i++, xLocal += 125)
-//        {
-//            getListTargets().add(new Target(xLocal, yLocal));
-//        }
+        xLocal = 50;
+        yLocal += Y_SPACE_TARGET;
+        for (int i = 6; i < 12; i++, xLocal += 125)
+        {
+            getListTargets().add(new Target(xLocal, yLocal));
+        }
+
+        xLocal = 50;
+        yLocal += Y_SPACE_TARGET;
+        for (int i = 12; i < 18; i++, xLocal += 125)
+        {
+            getListTargets().add(new Target(xLocal, yLocal));
+        }
+
+        xLocal = 50;
+        yLocal += Y_SPACE_TARGET;
+        for (int i = 18; i < 24; i++, xLocal += 125)
+        {
+            getListTargets().add(new Target(xLocal, yLocal));
+        }
     }
 
+    /**
+     * Drugi način generisanja meta.
+     */
     public void drawSecound() {
         int yLocal = 50;
 

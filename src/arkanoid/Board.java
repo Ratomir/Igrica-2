@@ -32,33 +32,7 @@ import sun.audio.AudioStream;
  */
 class Board extends JPanel implements Runnable {
 
-    /**
-     * @return the tickMessage
-     */
-    public int getTickMessage() {
-        return tickMessage;
-    }
-
-    /**
-     * @param tickMessage the tickMessage to set
-     */
-    public void setTickMessage(int tickMessage) {
-        this.tickMessage = tickMessage;
-    }
-
-    /**
-     * @return the starThread
-     */
-    public StarThread getStarThread() {
-        return starThread;
-    }
-
-    /**
-     * @param starThread the starThread to set
-     */
-    public void setStarThread(StarThread starThread) {
-        this.starThread = starThread;
-    }
+   
 
     public static enum GameState {
 
@@ -99,7 +73,7 @@ class Board extends JPanel implements Runnable {
     //broj zivota
     private int numberOfLife;
 
-    final Thread runner;
+    private Thread runner;
     private TargetThread targetThread;
     private StarThread starThread;
 
@@ -294,13 +268,19 @@ class Board extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * Funkcija postavlja glavnu porku na ekran i postavlja 
+     * tajmer poruke koja će se prikazivati na 0.
+     * 
+     * @param msg poruka koja se ispisuje
+     */
     public void setMainMessageAndTick(String msg) {
         this.setMainMessage(msg);
         this.setTickMessage(0);
     }
 
     /**
-     * Funkcija pokrece proces za board.
+     * Funkcija obrađuje proces runner.
      */
     @Override
     public void run() {
@@ -420,6 +400,34 @@ class Board extends JPanel implements Runnable {
         this.pad = pad;
     }
 
+     /**
+     * @return the tickMessage
+     */
+    public int getTickMessage() {
+        return tickMessage;
+    }
+
+    /**
+     * @param tickMessage the tickMessage to set
+     */
+    public void setTickMessage(int tickMessage) {
+        this.tickMessage = tickMessage;
+    }
+
+    /**
+     * @return the starThread
+     */
+    public StarThread getStarThread() {
+        return starThread;
+    }
+
+    /**
+     * @param starThread the starThread to set
+     */
+    public void setStarThread(StarThread starThread) {
+        this.starThread = starThread;
+    }
+    
     private class GameKeyAdapter extends KeyAdapter {
 
         /**

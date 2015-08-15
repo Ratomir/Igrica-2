@@ -71,6 +71,9 @@ public class Target extends JPanel implements GameObject {
         }
     }
 
+    /**
+     * Metoda vrši smanjivanje visine samo zelenih meta.
+     */
     @Override
     public void move() {
         if (getWIDTH() == 81) {
@@ -83,6 +86,11 @@ public class Target extends JPanel implements GameObject {
         this.setHEIGHT(getHEIGHT() + upDown);
     }
 
+    /**
+     * Metoda vrši iscrtavanje svake mete na polju za igru.
+     * 
+     * @param g objekat za crtanje
+     */
     @Override
     public void paint(Graphics g) {
         super.paintComponent(g);

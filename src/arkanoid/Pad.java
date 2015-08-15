@@ -22,6 +22,9 @@ class Pad extends JPanel implements GameObject, Runnable {
 
     
 
+    /**
+     * Stanja u kojima se može naći reket.
+     */
     enum MovingState {
 
         STANDING, MOVING_LEFT, MOVING_RIGHT
@@ -172,6 +175,9 @@ class Pad extends JPanel implements GameObject, Runnable {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * Funnkcija vršu smanjivanje ili poevećavanje dužine reketa ako je level parni.
+     */
     public void update() {
         if (this.board.getLevel() % 2 == 0) {
             if (getW() == 50) {
@@ -185,6 +191,9 @@ class Pad extends JPanel implements GameObject, Runnable {
     }
 
     @Override
+    /**
+     * Funkcija koja izvršava proces pat thread.
+    */
     public void run() {
 
         while (true) {

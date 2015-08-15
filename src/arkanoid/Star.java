@@ -13,7 +13,8 @@ import java.awt.Toolkit;
 import javax.swing.JPanel;
 
 /**
- *
+ *Klasa vrši instanciranje jedne zvjezdice sa sličicom.
+ * 
  * @author Ratomir
  */
 public class Star extends JPanel implements GameObject {
@@ -29,10 +30,10 @@ public class Star extends JPanel implements GameObject {
     Image img1 = Toolkit.getDefaultToolkit().getImage("src/img/star.png");
 
     /**
-     * Konstruktor koji na osnovu koordinata kreira zakrivljeni pravougaonik.
+     * Konstruktor koji na osnovu koordinata kreira zvjezdicu.
      *
-     * @param x x koordinata na kojoj se iscrtava pravougaonik
-     * @param y y koordinata na kojoj se iscrtava pravougaonik
+     * @param x x koordinata na kojoj se iscrtava zvjezdica
+     * @param y y koordinata na kojoj se iscrtava zvjezdica
      */
     public Star(int x, int y) {
         locationX = x;
@@ -48,6 +49,11 @@ public class Star extends JPanel implements GameObject {
     public void move() {
     }
 
+    /**
+     * Funkcija vrši iscrtavanje zvjezdice
+     * 
+     * @param g objekat za iscrtvanje
+     */
     @Override
     public void paint(Graphics g) {
         super.paintComponent(g);
